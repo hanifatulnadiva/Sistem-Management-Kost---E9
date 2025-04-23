@@ -144,7 +144,7 @@ namespace SistemKos1
             this.btnSimpan.Name = "btnSimpan";
             this.btnSimpan.Size = new System.Drawing.Size(100, 30);
             this.btnSimpan.TabIndex = 10;
-            this.btnSimpan.Text = "Add";
+            this.btnSimpan.Text = "Tambah";
             this.btnSimpan.UseVisualStyleBackColor = true;
             this.btnSimpan.Click += new System.EventHandler(this.btnSimpan_Click);
             // 
@@ -164,7 +164,7 @@ namespace SistemKos1
             this.btnHapus.Name = "btnHapus";
             this.btnHapus.Size = new System.Drawing.Size(100, 30);
             this.btnHapus.TabIndex = 12;
-            this.btnHapus.Text = "Delete";
+            this.btnHapus.Text = "Hapus";
             this.btnHapus.UseVisualStyleBackColor = true;
             this.btnHapus.Click += new System.EventHandler(this.btnHapus_Click);
             // 
@@ -174,7 +174,7 @@ namespace SistemKos1
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(100, 30);
             this.btnLoad.TabIndex = 13;
-            this.btnLoad.Text = "Read";
+            this.btnLoad.Text = "Cari";
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
             // 

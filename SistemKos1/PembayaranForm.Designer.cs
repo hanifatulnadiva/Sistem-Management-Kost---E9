@@ -98,7 +98,7 @@ namespace SistemKos1
             this.btnSimpan.Name = "btnSimpan";
             this.btnSimpan.Size = new System.Drawing.Size(56, 24);
             this.btnSimpan.TabIndex = 5;
-            this.btnSimpan.Text = "Add";
+            this.btnSimpan.Text = "Tambah";
             this.btnSimpan.Click += new System.EventHandler(this.btnSimpan_Click);
             // 
             // btnUpdate
@@ -116,7 +116,7 @@ namespace SistemKos1
             this.btnHapus.Name = "btnHapus";
             this.btnHapus.Size = new System.Drawing.Size(56, 24);
             this.btnHapus.TabIndex = 7;
-            this.btnHapus.Text = "Delete";
+            this.btnHapus.Text = "Hapus";
             this.btnHapus.Click += new System.EventHandler(this.btnHapus_Click);
             // 
             // label1
