@@ -54,7 +54,7 @@ namespace SistemKos1
 
             if (NIK.Length != 16 || !NIK.All(char.IsDigit))
             {
-                error = "NIK must be exactly 16 digits.";
+                error = "NIK harus 16 digit.";
                 return false;
             }
 
