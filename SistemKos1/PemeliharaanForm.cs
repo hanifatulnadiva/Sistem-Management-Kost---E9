@@ -22,6 +22,11 @@ namespace SistemKos1
                 MessageBox.Show("ID Pemeliharaan tidak boleh kosong.");
                 return false;
             }
+            if (txtIdPemeliharaan.Text.Length != 5)
+            {
+                MessageBox.Show("ID Pemeliharaan harus terdiri dari 5 karakter.");
+                return false;
+            }
             if (cmbIdKamar.SelectedIndex == -1)
             {
                 MessageBox.Show("ID Kamar harus dipilih.");
@@ -72,7 +77,6 @@ namespace SistemKos1
 
         private void btnSimpan_Click(object sender, EventArgs e)
         {
-            // Validasi input
             if (!ValidasiInput()) return;
 
             try
@@ -95,7 +99,7 @@ namespace SistemKos1
                     }
 
                     MessageBox.Show("Data pemeliharaan berhasil disimpan.");
-                    LoadData(); // Load ulang data ke DataGridView
+                    LoadData();
                 }
             }
             catch (Exception ex)
@@ -106,7 +110,6 @@ namespace SistemKos1
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            // Validasi input
             if (!ValidasiInput()) return;
 
             try
@@ -129,7 +132,7 @@ namespace SistemKos1
                     }
 
                     MessageBox.Show("Data pemeliharaan berhasil diperbarui.");
-                    LoadData(); // Load ulang data ke DataGridView
+                    LoadData();
                 }
             }
             catch (Exception ex)
@@ -140,7 +143,6 @@ namespace SistemKos1
 
         private void btnHapus_Click(object sender, EventArgs e)
         {
-            // Pastikan ada data yang dipilih
             if (dgvPemeliharaan.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Pilih data yang ingin dihapus.");
@@ -159,12 +161,11 @@ namespace SistemKos1
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = idPemeliharaan;
-
                         cmd.ExecuteNonQuery();
                     }
 
                     MessageBox.Show("Data pemeliharaan berhasil dihapus.");
-                    LoadData(); // Load ulang data ke DataGridView
+                    LoadData();
                 }
             }
             catch (Exception ex)
@@ -175,12 +176,11 @@ namespace SistemKos1
 
         private void btnLoad_Click(object sender, EventArgs e)
         {
-            LoadData(); // Load data ke DataGridView
+            LoadData();
         }
 
         private void dgvPemeliharaan_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Mengambil data yang dipilih di DataGridView dan mengisi field input
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dgvPemeliharaan.Rows[e.RowIndex];
@@ -192,7 +192,6 @@ namespace SistemKos1
             }
         }
 
-        // Fungsi untuk load combo box ID Kamar
         private void LoadComboBoxKamar()
         {
             try
@@ -200,7 +199,7 @@ namespace SistemKos1
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "SELECT id_kamar FROM kamar"; // Ganti dengan tabel kamar yang sesuai
+                    string query = "SELECT id_kamar FROM kamar";
                     SqlDataAdapter da = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -215,11 +214,10 @@ namespace SistemKos1
             }
         }
 
-        // Fungsi load data saat form pertama kali dibuka
         private void PemeliharaanForm_Load(object sender, EventArgs e)
         {
-            LoadComboBoxKamar(); // Memuat data kamar ke combo box
-            LoadData(); // Memuat data pemeliharaan ke DataGridView
+            LoadComboBoxKamar();
+            LoadData();
         }
     }
 }
