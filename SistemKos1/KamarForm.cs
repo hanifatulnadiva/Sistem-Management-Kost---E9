@@ -17,7 +17,13 @@ namespace SistemKos1
 
         private void btnCreate_Click(object sender, EventArgs e)
         {
-            string idKamar = txtIdKamar.Text;
+            string idKamar = txtIdKamar.Text.Trim();
+            if (idKamar.Length != 5)
+            {
+                MessageBox.Show("ID Kamar harus terdiri dari 5 karakter.");
+                return;
+            }
+
             decimal harga;
             bool isHargaValid = decimal.TryParse(txtHarga.Text, out harga);
             string status = cmbStatus.SelectedItem?.ToString();
@@ -38,7 +44,6 @@ namespace SistemKos1
                 return;
             }
 
-            // Cek apakah penyewa sudah menyewa kamar lain
             if (!string.IsNullOrWhiteSpace(nikPenyewa))
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -73,7 +78,7 @@ namespace SistemKos1
                 conn.Close();
 
                 MessageBox.Show("Kamar berhasil ditambahkan.");
-                LoadData();  // Reload data ke DataGridView
+                LoadData();
             }
         }
 
@@ -111,7 +116,13 @@ namespace SistemKos1
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            string idKamar = txtIdKamar.Text;
+            string idKamar = txtIdKamar.Text.Trim();
+            if (idKamar.Length != 5)
+            {
+                MessageBox.Show("ID Kamar harus terdiri dari 5 karakter.");
+                return;
+            }
+
             decimal harga;
             bool isHargaValid = decimal.TryParse(txtHarga.Text, out harga);
             string status = cmbStatus.SelectedItem?.ToString();
@@ -132,7 +143,6 @@ namespace SistemKos1
                 return;
             }
 
-            // Validasi penyewa tidak menyewa kamar lain (kecuali kamar ini sendiri)
             if (!string.IsNullOrWhiteSpace(nikPenyewa))
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -168,7 +178,7 @@ namespace SistemKos1
                 conn.Close();
 
                 MessageBox.Show("Kamar berhasil diperbarui.");
-                LoadData();  // Reload data ke DataGridView
+                LoadData();
             }
         }
 
@@ -193,7 +203,7 @@ namespace SistemKos1
                 conn.Close();
 
                 MessageBox.Show("Kamar berhasil dihapus.");
-                LoadData();  // Reload data ke DataGridView
+                LoadData();
             }
         }
 
@@ -227,14 +237,13 @@ namespace SistemKos1
         {
             cmbStatus.Items.AddRange(new object[] { "tersedia", "disewa" });
             cmbStatus.SelectedIndex = 0;
-            LoadPenyewaData();  // Memuat data penyewa
-            LoadData();         // Memuat data kamar otomatis ke DataGridView
+            LoadPenyewaData();
+            LoadData();
         }
 
-        // Event handler untuk mengisi form berdasarkan baris yang dipilih di DataGridView
         private void dataGridViewKamar_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0) // Pastikan baris yang dipilih valid
+            if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridViewKamar.Rows[e.RowIndex];
                 txtIdKamar.Text = row.Cells["id_kamar"].Value.ToString();

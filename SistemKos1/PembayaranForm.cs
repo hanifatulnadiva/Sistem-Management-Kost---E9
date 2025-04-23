@@ -20,8 +20,7 @@ namespace SistemKos1
             LoadData();
             cmbMetodePembayaran.Items.AddRange(new string[] { "Tunai", "Transfer" });
 
-            // Set batasan untuk jumlah pembayaran
-            numJumlah.Maximum = 1000000000; // contoh: 1 milyar, bisa disesuaikan
+            numJumlah.Maximum = 1000000000;
             numJumlah.Minimum = 0;
         }
 
@@ -61,6 +60,12 @@ namespace SistemKos1
 
         private void btnSimpan_Click(object sender, EventArgs e)
         {
+            if (txtIdPembayaran.Text.Length != 5)
+            {
+                MessageBox.Show("ID Pembayaran harus terdiri dari 5 karakter.");
+                return;
+            }
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -91,6 +96,12 @@ namespace SistemKos1
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
+            if (txtIdPembayaran.Text.Length != 5)
+            {
+                MessageBox.Show("ID Pembayaran harus terdiri dari 5 karakter.");
+                return;
+            }
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 string query = "UPDATE pembayaran SET NIK=@NIK, tanggal_pembayaran=@tanggal_pembayaran, jumlah=@jumlah, metode_pembayaran=@metode_pembayaran WHERE id_pembayaran=@id_pembayaran";
@@ -137,7 +148,6 @@ namespace SistemKos1
                 dtpTanggalPembayaran.Value = Convert.ToDateTime(row.Cells["tanggal_pembayaran"].Value);
 
                 decimal jumlah = Convert.ToDecimal(row.Cells["jumlah"].Value);
-                // Validasi nilai jumlah sebelum di set ke numJumlah
                 if (jumlah >= numJumlah.Minimum && jumlah <= numJumlah.Maximum)
                 {
                     numJumlah.Value = jumlah;
@@ -152,19 +162,10 @@ namespace SistemKos1
             }
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
+        private void label1_Click(object sender, EventArgs e) { }
 
-        }
+        private void label2_Click(object sender, EventArgs e) { }
 
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
+        private void label5_Click(object sender, EventArgs e) { }
     }
 }

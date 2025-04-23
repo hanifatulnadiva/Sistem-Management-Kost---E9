@@ -39,8 +39,8 @@ namespace SistemKos1
             }
 
             // Validasi panjang ID Kamar
-            string selectedKamar = cmbIdKamar.SelectedItem.ToString();
-            if (selectedKamar.Length != 5) 
+            string selectedKamar = cmbIdKamar.SelectedValue.ToString();
+            if (selectedKamar.Length != 5)
             {
                 MessageBox.Show("ID Kamar harus terdiri dari 5 karakter.");
                 return false;
@@ -85,11 +85,11 @@ namespace SistemKos1
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@id_pemeliharaan", txtIdPemeliharaan.Text);
-                        cmd.Parameters.AddWithValue("@id_kamar", cmbIdKamar.SelectedItem.ToString());
-                        cmd.Parameters.AddWithValue("@deskripsi", txtDeskripsi.Text);
-                        cmd.Parameters.AddWithValue("@tanggal", dtpTanggal.Value.Date);
-                        cmd.Parameters.AddWithValue("@biaya", numBiaya.Value);
+                        cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = txtIdPemeliharaan.Text;
+                        cmd.Parameters.Add("@id_kamar", SqlDbType.Char, 5).Value = cmbIdKamar.SelectedValue.ToString();
+                        cmd.Parameters.Add("@deskripsi", SqlDbType.VarChar, 200).Value = txtDeskripsi.Text;
+                        cmd.Parameters.Add("@tanggal", SqlDbType.Date).Value = dtpTanggal.Value.Date;
+                        cmd.Parameters.Add("@biaya", SqlDbType.Decimal).Value = numBiaya.Value;
 
                         cmd.ExecuteNonQuery();
                     }
@@ -119,11 +119,11 @@ namespace SistemKos1
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@id_pemeliharaan", txtIdPemeliharaan.Text);
-                        cmd.Parameters.AddWithValue("@id_kamar", cmbIdKamar.SelectedItem.ToString());
-                        cmd.Parameters.AddWithValue("@deskripsi", txtDeskripsi.Text);
-                        cmd.Parameters.AddWithValue("@tanggal", dtpTanggal.Value.Date);
-                        cmd.Parameters.AddWithValue("@biaya", numBiaya.Value);
+                        cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = txtIdPemeliharaan.Text;
+                        cmd.Parameters.Add("@id_kamar", SqlDbType.Char, 5).Value = cmbIdKamar.SelectedValue.ToString();
+                        cmd.Parameters.Add("@deskripsi", SqlDbType.VarChar, 200).Value = txtDeskripsi.Text;
+                        cmd.Parameters.Add("@tanggal", SqlDbType.Date).Value = dtpTanggal.Value.Date;
+                        cmd.Parameters.Add("@biaya", SqlDbType.Decimal).Value = numBiaya.Value;
 
                         cmd.ExecuteNonQuery();
                     }
@@ -158,7 +158,7 @@ namespace SistemKos1
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@id_pemeliharaan", idPemeliharaan);
+                        cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = idPemeliharaan;
 
                         cmd.ExecuteNonQuery();
                     }
@@ -185,7 +185,7 @@ namespace SistemKos1
             {
                 DataGridViewRow row = dgvPemeliharaan.Rows[e.RowIndex];
                 txtIdPemeliharaan.Text = row.Cells[0].Value.ToString();
-                cmbIdKamar.SelectedItem = row.Cells[1].Value.ToString();
+                cmbIdKamar.SelectedValue = row.Cells[1].Value.ToString();
                 txtDeskripsi.Text = row.Cells[2].Value.ToString();
                 dtpTanggal.Value = Convert.ToDateTime(row.Cells[3].Value);
                 numBiaya.Value = Convert.ToDecimal(row.Cells[4].Value);
