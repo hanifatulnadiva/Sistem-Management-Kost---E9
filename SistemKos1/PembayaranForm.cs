@@ -7,7 +7,8 @@ namespace SistemKos1
 {
     public partial class PembayaranForm : Form
     {
-        string connectionString = "Server=localhost;Database=SistemManagementKost;Trusted_Connection=True;";
+        private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA;Database=SistemManagementKost;Trusted_Connection=True;";
+
 
         public PembayaranForm()
         {
@@ -22,8 +23,6 @@ namespace SistemKos1
 
             numJumlah.Maximum = 1000000000;
             numJumlah.Minimum = 0;
-
-            dtpTanggalPembayaran.MinDate = new DateTime(DateTime.Now.Year, 1, 1);
         }
 
         private void LoadNIKs()
@@ -68,22 +67,16 @@ namespace SistemKos1
                 return;
             }
 
-            if (numJumlah.Value == 0)
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                MessageBox.Show("Jumlah pembayaran tidak boleh 0.");
-                return;
-            }
+                conn.Open();
+                SqlTransaction tran = conn.BeginTransaction();
 
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                try
                 {
-                    conn.Open();
-                    string query = "INSERT INTO pembayaran (id_pembayaran, NIK, tanggal_pembayaran, jumlah, metode_pembayaran) " +
-                                   "VALUES (@id_pembayaran, @NIK, @tanggal_pembayaran, @jumlah, @metode_pembayaran)";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    using (SqlCommand cmd = new SqlCommand("addPembayaran", conn, tran))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@id_pembayaran", txtIdPembayaran.Text);
                         cmd.Parameters.AddWithValue("@NIK", cmbNIK.SelectedValue);
                         cmd.Parameters.AddWithValue("@tanggal_pembayaran", dtpTanggalPembayaran.Value.Date);
@@ -92,15 +85,20 @@ namespace SistemKos1
 
                         cmd.ExecuteNonQuery();
                     }
+
+                    tran.Commit();
                     MessageBox.Show("Data pembayaran berhasil disimpan.");
                     LoadData();
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    MessageBox.Show("Gagal menyimpan data pembayaran: " + ex.Message);
+                }
             }
         }
+
+
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
@@ -110,47 +108,72 @@ namespace SistemKos1
                 return;
             }
 
-            if (numJumlah.Value == 0)
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                MessageBox.Show("Jumlah pembayaran tidak boleh 0.");
+                conn.Open();
+                SqlTransaction tran = conn.BeginTransaction();
+
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("UpdatePembayaran", conn, tran))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_pembayaran", txtIdPembayaran.Text);
+                        cmd.Parameters.AddWithValue("@NIK", cmbNIK.SelectedValue);
+                        cmd.Parameters.AddWithValue("@tanggal_pembayaran", dtpTanggalPembayaran.Value.Date);
+                        cmd.Parameters.AddWithValue("@jumlah", numJumlah.Value);
+                        cmd.Parameters.AddWithValue("@metode_pembayaran", cmbMetodePembayaran.SelectedItem.ToString());
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    tran.Commit();
+                    MessageBox.Show("Data pembayaran berhasil diperbarui.");
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    MessageBox.Show("Gagal memperbarui data pembayaran: " + ex.Message);
+                }
+            }
+        }
+
+
+        private void btnHapus_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtIdPembayaran.Text))
+            {
+                MessageBox.Show("Pilih data yang ingin dihapus terlebih dahulu.");
                 return;
             }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = "UPDATE pembayaran SET NIK=@NIK, tanggal_pembayaran=@tanggal_pembayaran, jumlah=@jumlah, metode_pembayaran=@metode_pembayaran WHERE id_pembayaran=@id_pembayaran";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@id_pembayaran", txtIdPembayaran.Text);
-                cmd.Parameters.AddWithValue("@NIK", cmbNIK.SelectedValue);
-                cmd.Parameters.AddWithValue("@tanggal_pembayaran", dtpTanggalPembayaran.Value.Date);
-                cmd.Parameters.AddWithValue("@jumlah", numJumlah.Value);
-                cmd.Parameters.AddWithValue("@metode_pembayaran", cmbMetodePembayaran.SelectedItem.ToString());
-
                 conn.Open();
-                cmd.ExecuteNonQuery();
-                conn.Close();
+                SqlTransaction tran = conn.BeginTransaction();
 
-                MessageBox.Show("Data pembayaran berhasil diperbarui.");
-                LoadData();
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("DeletePembayaran", conn, tran))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_pembayaran", txtIdPembayaran.Text);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    tran.Commit();
+                    MessageBox.Show("Data pembayaran berhasil dihapus.");
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    MessageBox.Show("Gagal menghapus data pembayaran: " + ex.Message);
+                }
             }
         }
 
-        private void btnHapus_Click(object sender, EventArgs e)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "DELETE FROM pembayaran WHERE id_pembayaran=@id_pembayaran";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@id_pembayaran", txtIdPembayaran.Text);
-
-                conn.Open();
-                cmd.ExecuteNonQuery();
-                conn.Close();
-
-                MessageBox.Show("Data pembayaran berhasil dihapus.");
-                LoadData();
-            }
-        }
 
         private void dataGridViewPembayaran_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -176,10 +199,62 @@ namespace SistemKos1
             }
         }
 
+        private void BtnAnalyze_Click(object sender, EventArgs e)
+        {
+            var heavyQuery = "SELECT id_pembayaran, NIK, jumlah FROM dbo.pembayaran WHERE jumlah > 1000000";
+            AnalyzeQuery(heavyQuery);
+        }
+
+        private void AnalyzeQuery(string sqlQuery)
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.InfoMessage += (s, e) => MessageBox.Show(e.Message, "STATISTICS INFO");
+                conn.Open();
+                var wrapped = $@"
+                SET STATISTICS IO ON;
+                SET STATISTICS TIME ON;
+                {sqlQuery}
+                SET STATISTICS IO OFF;
+                SET STATISTICS TIME OFF;";
+                using (var cmd = new SqlCommand(wrapped, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            LoadData();      // Reload dari database
+            ClearForm();     // Reset form input
+
+            // Debugging: Cek jumlah kolom dan baris
+            MessageBox.Show(
+                $"Jumlah Kolom: {dataGridViewPembayaran.ColumnCount}\nJumlah Baris: {dataGridViewPembayaran.RowCount}",
+                "Debugging DataGridView",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+
+
+        private void ClearForm()
+        {
+            txtIdPembayaran.Clear();
+            cmbNIK.SelectedIndex = -1;
+            dtpTanggalPembayaran.Value = DateTime.Today;
+            numJumlah.Value = numJumlah.Minimum;
+            cmbMetodePembayaran.SelectedIndex = -1;
+        }
+
+
         private void label1_Click(object sender, EventArgs e) { }
 
         private void label2_Click(object sender, EventArgs e) { }
 
         private void label5_Click(object sender, EventArgs e) { }
+
+
     }
 }

@@ -3,13 +3,25 @@
     partial class KamarForm
     {
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.TextBox txtIdKamar;
+        private System.Windows.Forms.TextBox txtHarga;
+        private System.Windows.Forms.ComboBox cmbStatus;
+        private System.Windows.Forms.ComboBox cmbPenyewa;
+        private System.Windows.Forms.DataGridView dataGridViewKamar;
+        private System.Windows.Forms.Button btnCreate;
+        private System.Windows.Forms.Button btnUpdate;
+        private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.Button btnRefresh;
+        private System.Windows.Forms.Button btnAnalyze;
+        private System.Windows.Forms.Label lblIdKamar;
+        private System.Windows.Forms.Label lblHarga;
+        private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Label lblPenyewa;
 
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
@@ -19,172 +31,158 @@
             this.txtHarga = new System.Windows.Forms.TextBox();
             this.cmbStatus = new System.Windows.Forms.ComboBox();
             this.cmbPenyewa = new System.Windows.Forms.ComboBox();
+            this.dataGridViewKamar = new System.Windows.Forms.DataGridView();
             this.btnCreate = new System.Windows.Forms.Button();
-            this.btnRead = new System.Windows.Forms.Button();
             this.btnUpdate = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
-            this.dataGridViewKamar = new System.Windows.Forms.DataGridView();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
+            this.btnRefresh = new System.Windows.Forms.Button();
+            this.btnAnalyze = new System.Windows.Forms.Button();
+            this.lblIdKamar = new System.Windows.Forms.Label();
+            this.lblHarga = new System.Windows.Forms.Label();
+            this.lblStatus = new System.Windows.Forms.Label();
+            this.lblPenyewa = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewKamar)).BeginInit();
             this.SuspendLayout();
             // 
             // txtIdKamar
             // 
-            this.txtIdKamar.Location = new System.Drawing.Point(155, 30);
+            this.txtIdKamar.Location = new System.Drawing.Point(121, 20);
             this.txtIdKamar.Name = "txtIdKamar";
-            this.txtIdKamar.Size = new System.Drawing.Size(200, 20);
-            this.txtIdKamar.TabIndex = 0;
+            this.txtIdKamar.Size = new System.Drawing.Size(100, 20);
+            this.txtIdKamar.TabIndex = 1;
             // 
             // txtHarga
             // 
-            this.txtHarga.Location = new System.Drawing.Point(155, 69);
+            this.txtHarga.Location = new System.Drawing.Point(121, 60);
             this.txtHarga.Name = "txtHarga";
-            this.txtHarga.Size = new System.Drawing.Size(200, 20);
-            this.txtHarga.TabIndex = 1;
+            this.txtHarga.Size = new System.Drawing.Size(100, 20);
+            this.txtHarga.TabIndex = 3;
             // 
             // cmbStatus
             // 
-            this.cmbStatus.FormattingEnabled = true;
-            this.cmbStatus.Location = new System.Drawing.Point(155, 110);
+            this.cmbStatus.Location = new System.Drawing.Point(121, 100);
             this.cmbStatus.Name = "cmbStatus";
-            this.cmbStatus.Size = new System.Drawing.Size(200, 21);
-            this.cmbStatus.TabIndex = 2;
+            this.cmbStatus.Size = new System.Drawing.Size(121, 21);
+            this.cmbStatus.TabIndex = 5;
             // 
             // cmbPenyewa
             // 
-            this.cmbPenyewa.FormattingEnabled = true;
-            this.cmbPenyewa.Location = new System.Drawing.Point(155, 148);
+            this.cmbPenyewa.Location = new System.Drawing.Point(126, 140);
             this.cmbPenyewa.Name = "cmbPenyewa";
-            this.cmbPenyewa.Size = new System.Drawing.Size(200, 21);
-            this.cmbPenyewa.TabIndex = 3;
+            this.cmbPenyewa.Size = new System.Drawing.Size(121, 21);
+            this.cmbPenyewa.TabIndex = 7;
+            this.cmbPenyewa.SelectedIndexChanged += new System.EventHandler(this.cmbPenyewa_SelectedIndexChanged);
+            // 
+            // dataGridViewKamar
+            // 
+            this.dataGridViewKamar.Location = new System.Drawing.Point(20, 220);
+            this.dataGridViewKamar.Name = "dataGridViewKamar";
+            this.dataGridViewKamar.Size = new System.Drawing.Size(540, 200);
+            this.dataGridViewKamar.TabIndex = 12;
+            this.dataGridViewKamar.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewKamar_CellClick);
+            this.dataGridViewKamar.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewKamar_CellFormatting);
             // 
             // btnCreate
             // 
-            this.btnCreate.Location = new System.Drawing.Point(120, 200);
+            this.btnCreate.Location = new System.Drawing.Point(20, 180);
             this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(75, 30);
-            this.btnCreate.TabIndex = 4;
-            this.btnCreate.Text = "Tambah";
-            this.btnCreate.UseVisualStyleBackColor = true;
+            this.btnCreate.Size = new System.Drawing.Size(75, 23);
+            this.btnCreate.TabIndex = 8;
+            this.btnCreate.Text = "Create";
             this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
-            // 
-            // btnRead
-            // 
-            this.btnRead.Location = new System.Drawing.Point(200, 200);
-            this.btnRead.Name = "btnRead";
-            this.btnRead.Size = new System.Drawing.Size(75, 30);
-            this.btnRead.TabIndex = 5;
-            this.btnRead.Text = "Cari";
-            this.btnRead.UseVisualStyleBackColor = true;
-            this.btnRead.Click += new System.EventHandler(this.btnRead_Click);
             // 
             // btnUpdate
             // 
-            this.btnUpdate.Location = new System.Drawing.Point(280, 200);
+            this.btnUpdate.Location = new System.Drawing.Point(110, 180);
             this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Size = new System.Drawing.Size(75, 30);
-            this.btnUpdate.TabIndex = 6;
+            this.btnUpdate.Size = new System.Drawing.Size(75, 23);
+            this.btnUpdate.TabIndex = 9;
             this.btnUpdate.Text = "Update";
-            this.btnUpdate.UseVisualStyleBackColor = true;
             this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
             // 
             // btnDelete
             // 
-            this.btnDelete.Location = new System.Drawing.Point(360, 200);
+            this.btnDelete.Location = new System.Drawing.Point(200, 180);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 30);
-            this.btnDelete.TabIndex = 7;
-            this.btnDelete.Text = "Hapus";
-            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.TabIndex = 10;
+            this.btnDelete.Text = "Delete";
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
-            // dataGridViewKamar
+            // btnRefresh
             // 
-            this.dataGridViewKamar.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewKamar.Location = new System.Drawing.Point(120, 250);
-            this.dataGridViewKamar.Name = "dataGridViewKamar";
-            this.dataGridViewKamar.RowTemplate.Height = 24;
-            this.dataGridViewKamar.Size = new System.Drawing.Size(600, 200);
-            this.dataGridViewKamar.TabIndex = 8;
-            this.dataGridViewKamar.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewKamar_CellClick);
-            this.dataGridViewKamar.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewKamar_CellFormatting);
+            this.btnRefresh.Location = new System.Drawing.Point(290, 180);
+            this.btnRefresh.Name = "btnRefresh";
+            this.btnRefresh.Size = new System.Drawing.Size(75, 23);
+            this.btnRefresh.TabIndex = 11;
+            this.btnRefresh.Text = "Refresh";
+            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
             // 
-            // label1
+            // btnAnalyze
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(78, 30);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(54, 13);
-            this.label1.TabIndex = 9;
-            this.label1.Text = "ID_Kamar";
+            this.btnAnalyze.Location = new System.Drawing.Point(380, 180);
+            this.btnAnalyze.Name = "btnAnalyze";
+            this.btnAnalyze.Size = new System.Drawing.Size(75, 23);
+            this.btnAnalyze.TabIndex = 13;
+            this.btnAnalyze.Text = "Analyze";
+            this.btnAnalyze.UseVisualStyleBackColor = true;
+            this.btnAnalyze.Click += new System.EventHandler(this.btnAnalyze_Click);
             // 
-            // label2
+            // lblIdKamar
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(78, 69);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(36, 13);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "Harga";
+            this.lblIdKamar.Location = new System.Drawing.Point(20, 20);
+            this.lblIdKamar.Name = "lblIdKamar";
+            this.lblIdKamar.Size = new System.Drawing.Size(100, 23);
+            this.lblIdKamar.TabIndex = 0;
+            this.lblIdKamar.Text = "ID Kamar:";
             // 
-            // label3
+            // lblHarga
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(78, 110);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(37, 13);
-            this.label3.TabIndex = 11;
-            this.label3.Text = "Status";
+            this.lblHarga.Location = new System.Drawing.Point(20, 60);
+            this.lblHarga.Name = "lblHarga";
+            this.lblHarga.Size = new System.Drawing.Size(100, 23);
+            this.lblHarga.TabIndex = 2;
+            this.lblHarga.Text = "Harga:";
             // 
-            // label4
+            // lblStatus
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(78, 148);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(51, 13);
-            this.label4.TabIndex = 12;
-            this.label4.Text = "Penyewa";
+            this.lblStatus.Location = new System.Drawing.Point(20, 100);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(100, 23);
+            this.lblStatus.TabIndex = 4;
+            this.lblStatus.Text = "Status:";
+            // 
+            // lblPenyewa
+            // 
+            this.lblPenyewa.Location = new System.Drawing.Point(20, 140);
+            this.lblPenyewa.Name = "lblPenyewa";
+            this.lblPenyewa.Size = new System.Drawing.Size(100, 23);
+            this.lblPenyewa.TabIndex = 6;
+            this.lblPenyewa.Text = "Penyewa:";
             // 
             // KamarForm
             // 
-            this.ClientSize = new System.Drawing.Size(800, 500);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridViewKamar);
-            this.Controls.Add(this.btnDelete);
-            this.Controls.Add(this.btnUpdate);
-            this.Controls.Add(this.btnRead);
-            this.Controls.Add(this.btnCreate);
-            this.Controls.Add(this.cmbPenyewa);
-            this.Controls.Add(this.cmbStatus);
-            this.Controls.Add(this.txtHarga);
+            this.ClientSize = new System.Drawing.Size(600, 450);
+            this.Controls.Add(this.lblIdKamar);
             this.Controls.Add(this.txtIdKamar);
+            this.Controls.Add(this.lblHarga);
+            this.Controls.Add(this.txtHarga);
+            this.Controls.Add(this.lblStatus);
+            this.Controls.Add(this.cmbStatus);
+            this.Controls.Add(this.lblPenyewa);
+            this.Controls.Add(this.cmbPenyewa);
+            this.Controls.Add(this.btnCreate);
+            this.Controls.Add(this.btnUpdate);
+            this.Controls.Add(this.btnDelete);
+            this.Controls.Add(this.btnRefresh);
+            this.Controls.Add(this.btnAnalyze);
+            this.Controls.Add(this.dataGridViewKamar);
             this.Name = "KamarForm";
-            this.Text = "Kamar Management";
+            this.Text = "Manajemen Kamar";
             this.Load += new System.EventHandler(this.KamarForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewKamar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
-
-        private System.Windows.Forms.TextBox txtIdKamar;
-        private System.Windows.Forms.TextBox txtHarga;
-        private System.Windows.Forms.ComboBox cmbStatus;
-        private System.Windows.Forms.ComboBox cmbPenyewa;
-        private System.Windows.Forms.Button btnCreate;
-        private System.Windows.Forms.Button btnRead;
-        private System.Windows.Forms.Button btnUpdate;
-        private System.Windows.Forms.Button btnDelete;
-        private System.Windows.Forms.DataGridView dataGridViewKamar;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
     }
 }

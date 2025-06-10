@@ -1,35 +1,33 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlClient;
+using System.Runtime.Caching;
+using System.Windows.Forms;
 
 namespace SistemKos1
 {
     public partial class PemeliharaanForm : Form
     {
-        string connectionString = "Server=localhost;Database=SistemManagementKost;Trusted_Connection=True;";
+        private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA; Database=SistemManagementKost;Trusted_Connection=True;";
+        private MemoryCache cache = MemoryCache.Default;
+        private string cacheKey = "PemeliharaanCache";
+        private CacheItemPolicy cachePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) };
 
         public PemeliharaanForm()
         {
             InitializeComponent();
         }
 
-        // Fungsi untuk validasi input
         private bool ValidasiInput()
         {
-            if (string.IsNullOrWhiteSpace(txtIdPemeliharaan.Text))
-            {
-                MessageBox.Show("ID Pemeliharaan tidak boleh kosong.");
-                return false;
-            }
-            if (txtIdPemeliharaan.Text.Length != 5)
+            if (string.IsNullOrWhiteSpace(txtIdPemeliharaan.Text) || txtIdPemeliharaan.Text.Length != 5)
             {
                 MessageBox.Show("ID Pemeliharaan harus terdiri dari 5 karakter.");
                 return false;
             }
-            if (cmbIdKamar.SelectedIndex == -1)
+            if (cmbIdKamar.SelectedIndex == -1 || cmbIdKamar.SelectedValue.ToString().Length != 5)
             {
-                MessageBox.Show("ID Kamar harus dipilih.");
+                MessageBox.Show("ID Kamar harus dipilih dan terdiri dari 5 karakter.");
                 return false;
             }
             if (string.IsNullOrWhiteSpace(txtDeskripsi.Text))
@@ -42,32 +40,29 @@ namespace SistemKos1
                 MessageBox.Show("Biaya harus lebih besar dari 0.");
                 return false;
             }
-
-            // Validasi panjang ID Kamar
-            string selectedKamar = cmbIdKamar.SelectedValue.ToString();
-            if (selectedKamar.Length != 5)
-            {
-                MessageBox.Show("ID Kamar harus terdiri dari 5 karakter.");
-                return false;
-            }
-
-
             return true;
         }
 
-        // Fungsi untuk load data ke DataGridView
         private void LoadData()
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                if (cache.Contains(cacheKey))
                 {
-                    conn.Open();
-                    string query = "SELECT * FROM pemeliharaan";
-                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvPemeliharaan.DataSource = dt;
+                    dgvPemeliharaan.DataSource = (DataTable)cache.Get(cacheKey);
+                }
+                else
+                {
+                    using (SqlConnection conn = new SqlConnection(connectionString))
+                    {
+                        conn.Open();
+                        string query = "SELECT TOP 100 id_pemeliharaan, id_kamar, deskripsi, tanggal, biaya FROM pemeliharaan ORDER BY tanggal DESC";
+                        SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        dgvPemeliharaan.DataSource = dt;
+                        cache.Set(cacheKey, dt, cachePolicy);
+                    }
                 }
             }
             catch (Exception ex)
@@ -80,67 +75,77 @@ namespace SistemKos1
         {
             if (!ValidasiInput()) return;
 
-            try
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string query = "INSERT INTO pemeliharaan (id_pemeliharaan, id_kamar, deskripsi, tanggal, biaya) " +
-                                   "VALUES (@id_pemeliharaan, @id_kamar, @deskripsi, @tanggal, @biaya)";
+                conn.Open();
+                SqlTransaction trans = conn.BeginTransaction();
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("AddPemeliharaan", conn, trans))
                     {
-                        cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = txtIdPemeliharaan.Text;
-                        cmd.Parameters.Add("@id_kamar", SqlDbType.Char, 5).Value = cmbIdKamar.SelectedValue.ToString();
-                        cmd.Parameters.Add("@deskripsi", SqlDbType.VarChar, 200).Value = txtDeskripsi.Text;
-                        cmd.Parameters.Add("@tanggal", SqlDbType.Date).Value = dtpTanggal.Value.Date;
-                        cmd.Parameters.Add("@biaya", SqlDbType.Decimal).Value = numBiaya.Value;
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_pemeliharaan", txtIdPemeliharaan.Text);
+                        cmd.Parameters.AddWithValue("@id_kamar", cmbIdKamar.SelectedValue.ToString());
+                        cmd.Parameters.AddWithValue("@deskripsi", txtDeskripsi.Text);
+                        cmd.Parameters.AddWithValue("@tanggal", dtpTanggal.Value.Date);
+                        cmd.Parameters.AddWithValue("@biaya", numBiaya.Value);
 
                         cmd.ExecuteNonQuery();
                     }
 
+                    trans.Commit();
+                    cache.Remove(cacheKey);
                     MessageBox.Show("Data pemeliharaan berhasil disimpan.");
                     LoadData();
+                    ClearForm();
+                }
+                catch (Exception ex)
+                {
+                    trans.Rollback();
+                    MessageBox.Show("Terjadi kesalahan: " + ex.Message);
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
         }
+
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (!ValidasiInput()) return;
 
-            try
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string query = "UPDATE pemeliharaan SET id_kamar = @id_kamar, deskripsi = @deskripsi, tanggal = @tanggal, biaya = @biaya " +
-                                   "WHERE id_pemeliharaan = @id_pemeliharaan";
+                conn.Open();
+                SqlTransaction trans = conn.BeginTransaction();
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("UpdatePemeliharaan", conn, trans))
                     {
-                        cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = txtIdPemeliharaan.Text;
-                        cmd.Parameters.Add("@id_kamar", SqlDbType.Char, 5).Value = cmbIdKamar.SelectedValue.ToString();
-                        cmd.Parameters.Add("@deskripsi", SqlDbType.VarChar, 200).Value = txtDeskripsi.Text;
-                        cmd.Parameters.Add("@tanggal", SqlDbType.Date).Value = dtpTanggal.Value.Date;
-                        cmd.Parameters.Add("@biaya", SqlDbType.Decimal).Value = numBiaya.Value;
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_pemeliharaan", txtIdPemeliharaan.Text);
+                        cmd.Parameters.AddWithValue("@id_kamar", cmbIdKamar.SelectedValue.ToString());
+                        cmd.Parameters.AddWithValue("@deskripsi", txtDeskripsi.Text);
+                        cmd.Parameters.AddWithValue("@tanggal", dtpTanggal.Value.Date);
+                        cmd.Parameters.AddWithValue("@biaya", numBiaya.Value);
 
                         cmd.ExecuteNonQuery();
                     }
 
+                    trans.Commit();
+                    cache.Remove(cacheKey);
                     MessageBox.Show("Data pemeliharaan berhasil diperbarui.");
                     LoadData();
+                    ClearForm();
+                }
+                catch (Exception ex)
+                {
+                    trans.Rollback();
+                    MessageBox.Show("Terjadi kesalahan saat memperbarui: " + ex.Message);
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
         }
+
 
         private void btnHapus_Click(object sender, EventArgs e)
         {
@@ -150,23 +155,23 @@ namespace SistemKos1
                 return;
             }
 
+            string idPemeliharaan = dgvPemeliharaan.SelectedRows[0].Cells["id_pemeliharaan"].Value.ToString();
+
             try
             {
-                string idPemeliharaan = dgvPemeliharaan.SelectedRows[0].Cells[0].Value.ToString();
-
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "DELETE FROM pemeliharaan WHERE id_pemeliharaan = @id_pemeliharaan";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    using (SqlCommand cmd = new SqlCommand("DeletePemeliharaan", conn))
                     {
-                        cmd.Parameters.Add("@id_pemeliharaan", SqlDbType.Char, 5).Value = idPemeliharaan;
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_pemeliharaan", idPemeliharaan);
                         cmd.ExecuteNonQuery();
                     }
-
+                    cache.Remove(cacheKey);
                     MessageBox.Show("Data pemeliharaan berhasil dihapus.");
                     LoadData();
+                    ClearForm();
                 }
             }
             catch (Exception ex)
@@ -175,23 +180,20 @@ namespace SistemKos1
             }
         }
 
-        private void btnLoad_Click(object sender, EventArgs e)
+        // Fungsi untuk merefresh tampilan DataGridView
+        private void btnRefresh_Click(object sender, EventArgs e)
         {
             LoadData();
+
+            // Debugging: Cek jumlah kolom dan baris
+            MessageBox.Show(
+                $"Jumlah kolom: {dgvPemeliharaan.ColumnCount}\nJumlah baris: {dgvPemeliharaan.RowCount}",
+                "Debugging DataGridView",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
 
-        private void dgvPemeliharaan_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dgvPemeliharaan.Rows[e.RowIndex];
-                txtIdPemeliharaan.Text = row.Cells[0].Value.ToString();
-                cmbIdKamar.SelectedValue = row.Cells[1].Value.ToString();
-                txtDeskripsi.Text = row.Cells[2].Value.ToString();
-                dtpTanggal.Value = Convert.ToDateTime(row.Cells[3].Value);
-                numBiaya.Value = Convert.ToDecimal(row.Cells[4].Value);
-            }
-        }
 
         private void LoadComboBoxKamar()
         {
@@ -217,9 +219,71 @@ namespace SistemKos1
 
         private void PemeliharaanForm_Load(object sender, EventArgs e)
         {
-            dtpTanggal.MinDate = new DateTime(DateTime.Now.Year, 1, 1); // Tidak bisa pilih tanggal sebelum 1 Jan tahun ini
+            ClearForm();
             LoadComboBoxKamar();
             LoadData();
+            dtpTanggal.MinDate = new DateTime(DateTime.Now.Year, 1, 1);
+            dtpTanggal.MaxDate = DateTime.Now.AddYears(1);
         }
+
+        private void AnalyzeQuery(string sqlQuery)
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.InfoMessage += (s, e) => MessageBox.Show(e.Message, "STATISTICS INFO");
+                conn.Open();
+
+                // Tampilkan data ke DataGridView
+                using (SqlDataAdapter da = new SqlDataAdapter(sqlQuery, conn))
+                {
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvPemeliharaan.DataSource = dt;
+                }
+
+                // Jalankan statistik performa
+                string wrapped = $@"
+            SET STATISTICS IO ON;
+            SET STATISTICS TIME ON;
+
+            {sqlQuery}
+
+            SET STATISTICS IO OFF;
+            SET STATISTICS TIME OFF;
+        ";
+
+                using (var cmd = new SqlCommand(wrapped, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        private void BtnAnalyze_Click(object sender, EventArgs e)
+        {
+
+            string heavyQuery = @"
+        SELECT 
+            id_kamar, 
+            COUNT(*) AS jumlah_perbaikan, 
+            SUM(biaya) AS total_biaya, 
+            MAX(tanggal) AS terakhir_diperbaiki
+        FROM pemeliharaan
+        GROUP BY id_kamar
+        ORDER BY total_biaya DESC;
+    ";
+
+            AnalyzeQuery(heavyQuery);
+        }
+
+        private void ClearForm()
+        {
+            txtIdPemeliharaan.Clear();
+            cmbIdKamar.SelectedIndex = -1;
+            txtDeskripsi.Clear();
+            dtpTanggal.Value = DateTime.Now;
+            numBiaya.Value = numBiaya.Minimum; // atau bisa juga di-set ke 0
+        }
+
     }
 }
+

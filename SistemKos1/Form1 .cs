@@ -46,5 +46,15 @@ namespace SistemKos1
         {
             Application.Exit();
         }
+
+        private void mainPanel_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void report_Click(object sender, EventArgs e)
+        {
+            ShowFormInPanel(new report());
+        }
     }
 }

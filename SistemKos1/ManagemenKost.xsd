@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ManagemenKost" targetNamespace="http://tempuri.org/ManagemenKost.xsd" xmlns:mstns="http://tempuri.org/ManagemenKost.xsd" xmlns="http://tempuri.org/ManagemenKost.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="SistemManagementKostConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="SistemManagementKostConnectionString (Settings)" ParameterPrefix="@" PropertyReference="ApplicationSettings.SistemKos1.Properties.Settings.GlobalReference.Default.SistemManagementKostConnectionString" Provider="System.Data.SqlClient" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="DataTable1TableAdapter" GeneratorDataComponentClassName="DataTable1TableAdapter" Name="DataTable1" UserDataComponentName="DataTable1TableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="SistemManagementKostConnectionString (Settings)" DbObjectType="Unknown" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT 
+    p.NIK,
+    p.nama,
+    p.kontak,
+    p.tanggal_masuk,
+    p.tanggal_keluar,
+
+    k.id_kamar,
+    k.harga AS harga_kamar,
+    k.status AS status_kamar,
+
+    pb.id_pembayaran,
+    pb.tanggal_pembayaran,
+    pb.jumlah AS jumlah_pembayaran,
+    pb.metode_pembayaran
+
+FROM 
+    pembayaran pb
+JOIN 
+    penyewa p ON pb.NIK = p.NIK
+LEFT JOIN 
+    kamar k ON p.NIK = k.NIK
+
+ORDER BY 
+    pb.tanggal_pembayaran DESC;
+</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="NIK" DataSetColumn="NIK" />
+              <Mapping SourceColumn="nama" DataSetColumn="nama" />
+              <Mapping SourceColumn="kontak" DataSetColumn="kontak" />
+              <Mapping SourceColumn="tanggal_masuk" DataSetColumn="tanggal_masuk" />
+              <Mapping SourceColumn="tanggal_keluar" DataSetColumn="tanggal_keluar" />
+              <Mapping SourceColumn="id_kamar" DataSetColumn="id_kamar" />
+              <Mapping SourceColumn="harga_kamar" DataSetColumn="harga_kamar" />
+              <Mapping SourceColumn="status_kamar" DataSetColumn="status_kamar" />
+              <Mapping SourceColumn="id_pembayaran" DataSetColumn="id_pembayaran" />
+              <Mapping SourceColumn="tanggal_pembayaran" DataSetColumn="tanggal_pembayaran" />
+              <Mapping SourceColumn="jumlah_pembayaran" DataSetColumn="jumlah_pembayaran" />
+              <Mapping SourceColumn="metode_pembayaran" DataSetColumn="metode_pembayaran" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ManagemenKost" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_UserDSName="ManagemenKost" msprop:Generator_DataSetName="ManagemenKost">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="DataTable1" msprop:Generator_RowEvHandlerName="DataTable1RowChangeEventHandler" msprop:Generator_RowDeletedName="DataTable1RowDeleted" msprop:Generator_RowDeletingName="DataTable1RowDeleting" msprop:Generator_RowEvArgName="DataTable1RowChangeEvent" msprop:Generator_TablePropName="DataTable1" msprop:Generator_RowChangedName="DataTable1RowChanged" msprop:Generator_RowChangingName="DataTable1RowChanging" msprop:Generator_TableClassName="DataTable1DataTable" msprop:Generator_RowClassName="DataTable1Row" msprop:Generator_TableVarName="tableDataTable1" msprop:Generator_UserTableName="DataTable1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="NIK" msprop:Generator_ColumnPropNameInRow="NIK" msprop:Generator_ColumnPropNameInTable="NIKColumn" msprop:Generator_ColumnVarNameInTable="columnNIK" msprop:Generator_UserColumnName="NIK">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="16" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="nama" msprop:Generator_ColumnPropNameInRow="nama" msprop:Generator_ColumnPropNameInTable="namaColumn" msprop:Generator_ColumnVarNameInTable="columnnama" msprop:Generator_UserColumnName="nama">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="kontak" msprop:Generator_ColumnPropNameInRow="kontak" msprop:Generator_ColumnPropNameInTable="kontakColumn" msprop:Generator_ColumnVarNameInTable="columnkontak" msprop:Generator_UserColumnName="kontak">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="13" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="tanggal_masuk" msprop:Generator_ColumnPropNameInRow="tanggal_masuk" msprop:Generator_ColumnPropNameInTable="tanggal_masukColumn" msprop:Generator_ColumnVarNameInTable="columntanggal_masuk" msprop:Generator_UserColumnName="tanggal_masuk" type="xs:dateTime" />
+              <xs:element name="tanggal_keluar" msprop:Generator_ColumnPropNameInRow="tanggal_keluar" msprop:Generator_ColumnPropNameInTable="tanggal_keluarColumn" msprop:Generator_ColumnVarNameInTable="columntanggal_keluar" msprop:Generator_UserColumnName="tanggal_keluar" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="id_kamar" msprop:Generator_ColumnPropNameInRow="id_kamar" msprop:Generator_ColumnPropNameInTable="id_kamarColumn" msprop:Generator_ColumnVarNameInTable="columnid_kamar" msprop:Generator_UserColumnName="id_kamar" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="5" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="harga_kamar" msprop:Generator_ColumnPropNameInRow="harga_kamar" msprop:Generator_ColumnPropNameInTable="harga_kamarColumn" msprop:Generator_ColumnVarNameInTable="columnharga_kamar" msprop:Generator_UserColumnName="harga_kamar" type="xs:decimal" minOccurs="0" />
+              <xs:element name="status_kamar" msprop:Generator_ColumnPropNameInRow="status_kamar" msprop:Generator_ColumnPropNameInTable="status_kamarColumn" msprop:Generator_ColumnVarNameInTable="columnstatus_kamar" msprop:Generator_UserColumnName="status_kamar" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="id_pembayaran" msprop:Generator_ColumnPropNameInRow="id_pembayaran" msprop:Generator_ColumnPropNameInTable="id_pembayaranColumn" msprop:Generator_ColumnVarNameInTable="columnid_pembayaran" msprop:Generator_UserColumnName="id_pembayaran">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="5" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="tanggal_pembayaran" msprop:Generator_ColumnPropNameInRow="tanggal_pembayaran" msprop:Generator_ColumnPropNameInTable="tanggal_pembayaranColumn" msprop:Generator_ColumnVarNameInTable="columntanggal_pembayaran" msprop:Generator_UserColumnName="tanggal_pembayaran" type="xs:dateTime" />
+              <xs:element name="jumlah_pembayaran" msprop:Generator_ColumnPropNameInRow="jumlah_pembayaran" msprop:Generator_ColumnPropNameInTable="jumlah_pembayaranColumn" msprop:Generator_ColumnVarNameInTable="columnjumlah_pembayaran" msprop:Generator_UserColumnName="jumlah_pembayaran" type="xs:decimal" />
+              <xs:element name="metode_pembayaran" msprop:Generator_ColumnPropNameInRow="metode_pembayaran" msprop:Generator_ColumnPropNameInTable="metode_pembayaranColumn" msprop:Generator_ColumnVarNameInTable="columnmetode_pembayaran" msprop:Generator_UserColumnName="metode_pembayaran" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="8" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
