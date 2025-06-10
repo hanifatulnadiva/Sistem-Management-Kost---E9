@@ -18,6 +18,7 @@ namespace SistemKos1
 
         private void PenyewaForm_Load(object sender, EventArgs e)
         {
+            dtpTanggalMasuk.MinDate = new DateTime(DateTime.Now.Year, 1, 1); ;
             LoadData();
         }
 
@@ -43,24 +44,31 @@ namespace SistemKos1
         private bool ValidasiInput(out string error)
         {
             error = "";
-            string NIK = txtNIK.Text;
-            string kontak = txtKontak.Text;
+            string NIK = txtNIK.Text.Trim();
+            string nama = txtNama.Text.Trim();
+            string kontak = txtKontak.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(NIK) || string.IsNullOrWhiteSpace(txtNama.Text) || string.IsNullOrWhiteSpace(kontak))
+            if (string.IsNullOrWhiteSpace(NIK) || string.IsNullOrWhiteSpace(nama) || string.IsNullOrWhiteSpace(kontak))
             {
-                error = "Please fill in all fields.";
+                error = "Semua field harus diisi.";
                 return false;
             }
 
             if (NIK.Length != 16 || !NIK.All(char.IsDigit))
             {
-                error = "NIK harus 16 digit.";
+                error = "NIK harus terdiri dari 16 digit angka.";
+                return false;
+            }
+
+            if (!nama.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            {
+                error = "Nama hanya boleh berisi huruf dan spasi.";
                 return false;
             }
 
             if (!kontak.All(char.IsDigit) || kontak.Length < 12 || kontak.Length > 13)
             {
-                error = "Kontak must be numeric and between 12 to 13 digits.";
+                error = "Kontak harus berupa angka dan terdiri dari 12 hingga 13 digit.";
                 return false;
             }
 
@@ -79,9 +87,9 @@ namespace SistemKos1
             {
                 string query = "INSERT INTO penyewa (NIK, nama, kontak, tanggal_masuk) VALUES (@NIK, @nama, @kontak, @tanggalMasuk)";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text);
-                cmd.Parameters.AddWithValue("@nama", txtNama.Text);
-                cmd.Parameters.AddWithValue("@kontak", txtKontak.Text);
+                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text.Trim());
+                cmd.Parameters.AddWithValue("@nama", txtNama.Text.Trim());
+                cmd.Parameters.AddWithValue("@kontak", txtKontak.Text.Trim());
                 cmd.Parameters.Add("@tanggalMasuk", SqlDbType.Date).Value = dtpTanggalMasuk.Value.Date;
 
                 conn.Open();
@@ -99,7 +107,7 @@ namespace SistemKos1
             {
                 string query = "SELECT * FROM penyewa WHERE NIK = @NIK";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text);
+                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text.Trim());
 
                 conn.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -129,9 +137,9 @@ namespace SistemKos1
             {
                 string query = "UPDATE penyewa SET nama = @nama, kontak = @kontak, tanggal_masuk = @tanggalMasuk WHERE NIK = @NIK";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text);
-                cmd.Parameters.AddWithValue("@nama", txtNama.Text);
-                cmd.Parameters.AddWithValue("@kontak", txtKontak.Text);
+                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text.Trim());
+                cmd.Parameters.AddWithValue("@nama", txtNama.Text.Trim());
+                cmd.Parameters.AddWithValue("@kontak", txtKontak.Text.Trim());
                 cmd.Parameters.Add("@tanggalMasuk", SqlDbType.Date).Value = dtpTanggalMasuk.Value.Date;
 
                 conn.Open();
@@ -155,7 +163,7 @@ namespace SistemKos1
             {
                 string query = "DELETE FROM penyewa WHERE NIK = @NIK";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text);
+                cmd.Parameters.AddWithValue("@NIK", txtNIK.Text.Trim());
 
                 conn.Open();
                 cmd.ExecuteNonQuery();

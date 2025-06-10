@@ -40,7 +40,7 @@ namespace SistemKos1
 
             if (string.IsNullOrWhiteSpace(idKamar) || harga <= 0 || string.IsNullOrWhiteSpace(status))
             {
-                MessageBox.Show("Please fill in all fields and ensure valid data.");
+                MessageBox.Show("Harga harus berisi angka dan tidak boleh 0.");
                 return;
             }
 
@@ -88,7 +88,7 @@ namespace SistemKos1
 
             if (string.IsNullOrWhiteSpace(idKamar))
             {
-                MessageBox.Show("Please enter a valid Kamar ID.");
+                MessageBox.Show("Silakan masukkan ID Kamar yang valid.");
                 return;
             }
 
@@ -139,7 +139,7 @@ namespace SistemKos1
 
             if (string.IsNullOrWhiteSpace(idKamar) || harga <= 0 || string.IsNullOrWhiteSpace(status))
             {
-                MessageBox.Show("Please fill in all fields and ensure valid data.");
+                MessageBox.Show("Silakan isi semua data dan pastikan datanya valid.");
                 return;
             }
 
@@ -188,7 +188,7 @@ namespace SistemKos1
 
             if (string.IsNullOrWhiteSpace(idKamar))
             {
-                MessageBox.Show("Please enter a valid Kamar ID.");
+                MessageBox.Show("Silakan masukkan ID Kamar yang valid.");
                 return;
             }
 
@@ -270,6 +270,11 @@ namespace SistemKos1
                     }
                 }
             }
+        }
+
+        private void dataGridViewKamar_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

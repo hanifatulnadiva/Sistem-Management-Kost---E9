@@ -7,7 +7,7 @@ namespace SistemKos1
 {
     public partial class PembayaranForm : Form
     {
-        private string connectionString = "Server=localhost;Database=SistemManagementKost;Trusted_Connection=True;";
+        string connectionString = "Server=localhost;Database=SistemManagementKost;Trusted_Connection=True;";
 
         public PembayaranForm()
         {
@@ -22,6 +22,8 @@ namespace SistemKos1
 
             numJumlah.Maximum = 1000000000;
             numJumlah.Minimum = 0;
+
+            dtpTanggalPembayaran.MinDate = new DateTime(DateTime.Now.Year, 1, 1);
         }
 
         private void LoadNIKs()
@@ -66,6 +68,12 @@ namespace SistemKos1
                 return;
             }
 
+            if (numJumlah.Value == 0)
+            {
+                MessageBox.Show("Jumlah pembayaran tidak boleh 0.");
+                return;
+            }
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -99,6 +107,12 @@ namespace SistemKos1
             if (txtIdPembayaran.Text.Length != 5)
             {
                 MessageBox.Show("ID Pembayaran harus terdiri dari 5 karakter.");
+                return;
+            }
+
+            if (numJumlah.Value == 0)
+            {
+                MessageBox.Show("Jumlah pembayaran tidak boleh 0.");
                 return;
             }
 

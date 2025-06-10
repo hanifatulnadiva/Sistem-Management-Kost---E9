@@ -7,7 +7,7 @@ namespace SistemKos1
 {
     public partial class PemeliharaanForm : Form
     {
-        private string connectionString = "Server=localhost;Database=SistemManagementKost;Trusted_Connection=True;";
+        string connectionString = "Server=localhost;Database=SistemManagementKost;Trusted_Connection=True;";
 
         public PemeliharaanForm()
         {
@@ -50,6 +50,7 @@ namespace SistemKos1
                 MessageBox.Show("ID Kamar harus terdiri dari 5 karakter.");
                 return false;
             }
+
 
             return true;
         }
@@ -216,6 +217,7 @@ namespace SistemKos1
 
         private void PemeliharaanForm_Load(object sender, EventArgs e)
         {
+            dtpTanggal.MinDate = new DateTime(DateTime.Now.Year, 1, 1); // Tidak bisa pilih tanggal sebelum 1 Jan tahun ini
             LoadComboBoxKamar();
             LoadData();
         }
