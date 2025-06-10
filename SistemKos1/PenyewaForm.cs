@@ -128,12 +128,6 @@ namespace SistemKos1
             return true;
         }
 
-        private void ClearCache()
-        {
-            if (_cache.Contains(CacheKey))
-                _cache.Remove(CacheKey);
-        }
-
         private void EnsureIndexes()
         {
             using (var conn = new SqlConnection(connectionString))
@@ -151,7 +145,7 @@ namespace SistemKos1
                         IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_penyewa_tanggal_keluar')
                             CREATE NONCLUSTERED INDEX idx_penyewa_tanggal_keluar ON dbo.penyewa(tanggal_keluar)   
                     END";
-                using(var cmd=new SqlCommand(indexScript, conn))
+                using (var cmd = new SqlCommand(indexScript, conn))
                 {
                     cmd.ExecuteNonQuery();
                 }
@@ -168,12 +162,12 @@ namespace SistemKos1
                 conn.Open();
 
                 var wrapped = $@"
-            SET STATISTICS IO ON;
-            SET STATISTICS TIME ON;
-            {sqlQuery};
-            SET STATISTICS IO OFF;
-            SET STATISTICS TIME OFF;
-        ";
+                    SET STATISTICS IO ON;
+                    SET STATISTICS TIME ON;
+                    {sqlQuery};
+                    SET STATISTICS IO OFF;
+                    SET STATISTICS TIME OFF;
+                ";
 
                 using (var cmd = new SqlCommand(wrapped, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -183,7 +177,7 @@ namespace SistemKos1
                         {
                             // Bisa proses data jika ingin
                         }
-                    } while (reader.NextResult());
+                    } while (reader.NextResult()) ;
                 }
             }
         }
@@ -242,16 +236,11 @@ namespace SistemKos1
             }
         }
 
-        private void btnRead_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (dataGridViewPenyewa.SelectedRows.Count == 0)
             {
-                MessageBox.Show("pilih data yng ingin diubah!", "peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Pilih data yang ingin diubah!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -261,56 +250,72 @@ namespace SistemKos1
                 return;
             }
 
-                using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("UpdatePenyewa", conn, transaction))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@NIK", txtNIK.Text.Trim());
+                        cmd.Parameters.AddWithValue("@nama", txtNama.Text.Trim());
+                        cmd.Parameters.AddWithValue("@kontak", txtKontak.Text.Trim());
+                        cmd.Parameters.Add("@tanggal_masuk", SqlDbType.Date).Value = dtpTanggalMasuk.Value.Date;
+                        cmd.Parameters.Add("@tanggal_keluar", SqlDbType.Date).Value = dtpTanggalKeluar.Value.Date;
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            transaction.Commit(); // Commit jika berhasil
+                            _cache.Remove(CacheKey);
+                            MessageBox.Show("Data berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadData();
+                            ClearForm();
+                        }
+                        else
+                        {
+                            transaction.Rollback(); // Rollback jika tidak ada baris yang diperbarui
+                            MessageBox.Show("Data tidak ditemukan atau gagal diperbarui!", "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
                 {
                     try
                     {
-                        conn.Open();
-                        using (SqlCommand cmd = new SqlCommand("UpdatePenyewa", conn))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@NIK", txtNIK.Text.Trim());
-                            cmd.Parameters.AddWithValue("@nama", txtNama.Text.Trim());
-                            cmd.Parameters.AddWithValue("@kontak", txtKontak.Text.Trim());
-                            cmd.Parameters.Add("@tanggal_masuk", SqlDbType.Date).Value = dtpTanggalMasuk.Value.Date;
-                            cmd.Parameters.Add("@tanggal_keluar", SqlDbType.Date).Value = dtpTanggalKeluar.Value.Date;
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                            if (rowsAffected > 0)
-                            {
-                             _cache.Remove(CacheKey);
-                             MessageBox.Show("data berhasil diperbarui!", "sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                LoadData();
-                                ClearForm();
-                            }
-                            else
-                            {
-                                MessageBox.Show("data tidak ditemukan atau gagal diperbarui!", "kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error); ;
-                            }
-                        }
+                        transaction.Rollback(); // Rollback saat exception
                     }
-                    catch (Exception ex)
+                    catch (Exception rollbackEx)
                     {
-                        MessageBox.Show("error:" + ex.Message, "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Rollback error: " + rollbackEx.Message, "Kesalahan Rollback", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+
+                    MessageBox.Show("Error: " + ex.Message, "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
         }
+
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if(dataGridViewPenyewa.SelectedRows.Count > 0)
+            if (dataGridViewPenyewa.SelectedRows.Count > 0)
             {
-                DialogResult confirm = MessageBox.Show("yakin ingin meghapus data ini?","konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult confirm = MessageBox.Show("Yakin ingin menghapus data ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (confirm == DialogResult.Yes)
                 {
                     using (SqlConnection conn = new SqlConnection(connectionString))
                     {
+                        conn.Open();
+                        SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+
                         try
                         {
                             string NIK = dataGridViewPenyewa.SelectedRows[0].Cells["NIK"].Value.ToString();
-                            conn.Open();
-                            // Panggil stored procedure untuk hapus data
-                            using (SqlCommand cmd = new SqlCommand("DeletePenyewa", conn))
+
+                            using (SqlCommand cmd = new SqlCommand("DeletePenyewa", conn, transaction))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
                                 cmd.Parameters.AddWithValue("@NIK", NIK);
@@ -318,31 +323,41 @@ namespace SistemKos1
                                 int rowsAffected = cmd.ExecuteNonQuery();
                                 if (rowsAffected > 0)
                                 {
+                                    transaction.Commit(); // Commit jika berhasil
                                     _cache.Remove(CacheKey);
-                                    MessageBox.Show("data berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    MessageBox.Show("Data berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                     LoadData();
                                     ClearForm();
                                 }
                                 else
                                 {
+                                    transaction.Rollback(); // Rollback jika tidak ada yang dihapus
                                     MessageBox.Show("Data tidak ditemukan atau gagal dihapus!", "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
                             }
                         }
                         catch (Exception ex)
                         {
+                            try
+                            {
+                                transaction.Rollback(); // Rollback jika terjadi error
+                            }
+                            catch (Exception rollbackEx)
+                            {
+                                MessageBox.Show("Rollback error: " + rollbackEx.Message, "Kesalahan Rollback", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+
                             MessageBox.Show("Terjadi kesalahan saat menghapus data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
             }
-            else 
+            else
             {
                 MessageBox.Show("Pilih data yang akan dihapus!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
             }
-       
         }
+
 
         private void dataGridViewPenyewa_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -431,17 +446,17 @@ namespace SistemKos1
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-                
-                LoadData();
 
-                // Debugging: Cek jumlah kolom dan baris
-                MessageBox.Show(
-                    $"Jumlah Kolom: {dataGridViewPenyewa.ColumnCount}\nJumlah Baris: {dataGridViewPenyewa.RowCount}",
-                    "Debugging DataGridView",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
-            
+            LoadData();
+
+            // Debugging: Cek jumlah kolom dan baris
+            MessageBox.Show(
+                $"Jumlah Kolom: {dataGridViewPenyewa.ColumnCount}\nJumlah Baris: {dataGridViewPenyewa.RowCount}",
+                "Debugging DataGridView",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+
         }
     }
 }
