@@ -44,7 +44,6 @@
             this.btnAnalisis = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.dtpTanggalKeluar = new System.Windows.Forms.DateTimePicker();
-            this.btnImport = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPenyewa)).BeginInit();
             this.SuspendLayout();
             // 
@@ -160,7 +159,7 @@
             this.dataGridViewPenyewa.Location = new System.Drawing.Point(381, 12);
             this.dataGridViewPenyewa.Name = "dataGridViewPenyewa";
             this.dataGridViewPenyewa.RowHeadersWidth = 62;
-            this.dataGridViewPenyewa.Size = new System.Drawing.Size(290, 411);
+            this.dataGridViewPenyewa.Size = new System.Drawing.Size(474, 411);
             this.dataGridViewPenyewa.TabIndex = 12;
             this.dataGridViewPenyewa.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewPenyewa_CellClick);
             // 
@@ -191,20 +190,9 @@
             this.dtpTanggalKeluar.TabIndex = 15;
             this.dtpTanggalKeluar.Value = new System.DateTime(2025, 6, 9, 17, 5, 23, 0);
             // 
-            // btnImport
-            // 
-            this.btnImport.Location = new System.Drawing.Point(82, 416);
-            this.btnImport.Name = "btnImport";
-            this.btnImport.Size = new System.Drawing.Size(215, 49);
-            this.btnImport.TabIndex = 16;
-            this.btnImport.Text = "Import Data";
-            this.btnImport.UseVisualStyleBackColor = true;
-            this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
-            // 
             // PenyewaForm
             // 
-            this.ClientSize = new System.Drawing.Size(700, 580);
-            this.Controls.Add(this.btnImport);
+            this.ClientSize = new System.Drawing.Size(898, 479);
             this.Controls.Add(this.dtpTanggalKeluar);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnAnalisis);
@@ -233,6 +221,5 @@
         private System.Windows.Forms.Button btnAnalisis;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DateTimePicker dtpTanggalKeluar;
-        private System.Windows.Forms.Button btnImport;
     }
 }

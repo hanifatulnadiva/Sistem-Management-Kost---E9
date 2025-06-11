@@ -76,6 +76,9 @@ namespace SistemKos1
             string NIK = txtNIK.Text.Trim();
             string nama = txtNama.Text.Trim();
             string kontak = txtKontak.Text.Trim();
+            DateTime tanggalMasuk = dtpTanggalMasuk.Value.Date;
+            DateTime tanggalKeluar = dtpTanggalKeluar.Value.Date;
+            int totalBulan = ((tanggalKeluar.Year - tanggalMasuk.Year) * 12) + (tanggalKeluar.Month - tanggalMasuk.Month);
 
             if (string.IsNullOrWhiteSpace(NIK) || string.IsNullOrWhiteSpace(nama) || string.IsNullOrWhiteSpace(kontak))
             {
@@ -124,6 +127,19 @@ namespace SistemKos1
                 error = "Kontak harus diawali dengan 08.";
                 return false;
             }
+
+            if ((tanggalKeluar - tanggalMasuk).TotalDays < 30 ||
+            ((tanggalKeluar - tanggalMasuk).TotalDays % 30 != 0))
+            {
+                double totalHari = (tanggalKeluar - tanggalMasuk).TotalDays;
+                int sisaHari = 30 - ((int)totalHari % 30);
+                DateTime tanggalBenar = tanggalMasuk.AddDays(((int)(totalHari / 30) + 1) * 30);
+
+                error = $"Durasi sewa harus kelipatan 30 hari (1 bulan).\n" +
+                        $"seharusnya tanggal keluar pada: {tanggalBenar:dd MMMM yyyy}";
+                return false;
+            }
+
 
             return true;
         }
@@ -392,56 +408,6 @@ namespace SistemKos1
         {
             string sqlQuery = "SELECT * FROM penyewa";
             AnalyzeQuery(sqlQuery);
-        }
-
-        private void btnImport_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Excel files|*.xlsx; *.xlsm";
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                string filePath = openFileDialog.FileName;
-                PreviewData(filePath);//display privie before importing
-            }
-        }
-        private void PreviewData(string filePath)
-        {
-            try
-            {
-                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    IWorkbook workbook = new XSSFWorkbook(fs); //membuka workbook excel
-                    ISheet sheet = workbook.GetSheetAt(0); //mendapatkan worksheet pertama
-                    DataTable dt = new DataTable();
-
-                    //membaca header kolom
-                    IRow headerRow = sheet.GetRow(0);
-                    foreach (var cell in headerRow.Cells)
-                    {
-                        dt.Columns.Add(cell.ToString());
-                    }
-                    //membaca sisa data 
-                    for (int i = 1; i <= sheet.LastRowNum; i++) //lewati baris header
-                    {
-                        IRow dataRow = sheet.GetRow(i);
-                        DataRow newRow = dt.NewRow();
-                        int cellIndex = 0;
-                        foreach (var cell in dataRow.Cells)
-                        {
-                            newRow[cellIndex] = cell.ToString();
-                            cellIndex++;
-                        }
-                        dt.Rows.Add(newRow);
-                    }
-                    //membuka priviewdata  dan mengirimkan datatable ke form yang tersebut
-                    preview previewForm = new preview(dt);
-                    previewForm.ShowDialog(); //tampilkan preview data
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error reading the excel file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)

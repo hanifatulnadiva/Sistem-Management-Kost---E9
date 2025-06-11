@@ -20,9 +20,11 @@ namespace SistemKos1
             LoadNIKs();
             LoadData();
             cmbMetodePembayaran.Items.AddRange(new string[] { "Tunai", "Transfer" });
+            dtpTanggalPembayaran.MinDate = new DateTime(DateTime.Now.Year, 1, 1);
+            dtpTanggalPembayaran.MaxDate = DateTime.Now.AddYears(1);
 
             numJumlah.Maximum = 1000000000;
-            numJumlah.Minimum = 0;
+            numJumlah.Minimum = 500000;
         }
 
         private void LoadNIKs()
@@ -59,6 +61,53 @@ namespace SistemKos1
             }
         }
 
+        private void EnsurePembayaranIndexes()
+        {
+            string[] queries = {
+        // Index untuk NIK
+        @"IF NOT EXISTS (
+            SELECT 1 FROM sys.indexes 
+            WHERE name = 'idx_pembayaran_NIK' AND object_id = OBJECT_ID('dbo.pembayaran')
+        )
+        BEGIN
+            CREATE NONCLUSTERED INDEX idx_pembayaran_NIK ON dbo.pembayaran (NIK);
+        END",
+
+        // Index untuk tanggal_pembayaran
+        @"IF NOT EXISTS (
+            SELECT 1 FROM sys.indexes 
+            WHERE name = 'idx_pembayaran_tanggal' AND object_id = OBJECT_ID('dbo.pembayaran')
+        )
+        BEGIN
+            CREATE NONCLUSTERED INDEX idx_pembayaran_tanggal ON dbo.pembayaran (tanggal_pembayaran);
+        END",
+
+        // Index untuk metode_pembayaran
+        @"IF NOT EXISTS (
+            SELECT 1 FROM sys.indexes 
+            WHERE name = 'idx_pembayaran_metode' AND object_id = OBJECT_ID('dbo.pembayaran')
+        )
+        BEGIN
+            CREATE NONCLUSTERED INDEX idx_pembayaran_metode ON dbo.pembayaran (metode_pembayaran);
+        END"
+    };
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                foreach (string query in queries)
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                conn.Close();
+            }
+        }
+
+
+
         private void btnSimpan_Click(object sender, EventArgs e)
         {
             if (txtIdPembayaran.Text.Length != 5)
@@ -89,6 +138,7 @@ namespace SistemKos1
                     tran.Commit();
                     MessageBox.Show("Data pembayaran berhasil disimpan.");
                     LoadData();
+                    ClearForm();
                 }
                 catch (Exception ex)
                 {
@@ -130,6 +180,7 @@ namespace SistemKos1
                     tran.Commit();
                     MessageBox.Show("Data pembayaran berhasil diperbarui.");
                     LoadData();
+                    ClearForm();
                 }
                 catch (Exception ex)
                 {
@@ -165,6 +216,7 @@ namespace SistemKos1
                     tran.Commit();
                     MessageBox.Show("Data pembayaran berhasil dihapus.");
                     LoadData();
+                    ClearForm();
                 }
                 catch (Exception ex)
                 {
