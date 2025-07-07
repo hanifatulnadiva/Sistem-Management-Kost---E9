@@ -5,9 +5,13 @@ namespace SistemKos1
 {
     public partial class LoginForm : Form
     {
+        Koneksi kn = new Koneksi();
+        string strKonek = "";
+        
         public LoginForm()
         {
             InitializeComponent();
+            strKonek = kn.connectionString();
         }
 
         // Fungsi untuk memeriksa login

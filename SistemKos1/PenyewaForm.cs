@@ -14,8 +14,10 @@ namespace SistemKos1
 {
     public partial class PenyewaForm : Form
     {
+        Koneksi kn = new Koneksi();
+        string strKonek = "";
 
-        string connectionString = "Server=HANIFATUL-NADIV\\HANIFA; Database=SistemManagementKost;Trusted_Connection=True;";
+        //string connectionString = "Server=HANIFATUL-NADIV\\HANIFA; Database=SistemManagementKost;Trusted_Connection=True;";
         ObjectCache _cache = MemoryCache.Default;
         string CacheKey = "PenyewaData";
         CacheItemPolicy _policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) };
@@ -23,6 +25,7 @@ namespace SistemKos1
         public PenyewaForm()
         {
             InitializeComponent();
+            strKonek = kn.connectionString();
             dataGridViewPenyewa.CellClick += dataGridViewPenyewa_CellClick;
         }
 
@@ -38,6 +41,7 @@ namespace SistemKos1
 
         private void LoadData()
         {
+            SqlConnection conn = new SqlConnection(kn.connectionString());
             DataTable dt;
 
             if (_cache.Contains(CacheKey))
@@ -49,7 +53,7 @@ namespace SistemKos1
                 dt = new DataTable();
                 try
                 {
-                    using (var conn = new SqlConnection(connectionString))
+                   // using (var conn = new SqlConnection(kn.connectionString))
                     {
                         conn.Open();
                         var query = "SELECT * FROM penyewa";
@@ -146,11 +150,11 @@ namespace SistemKos1
 
         private void EnsureIndexes()
         {
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 var indexScript = @"
-                    IF OBJECT_ID('dbo.Penyewa', 'U') IS NOT NULL
+                    IF OBJECT_ID('dbo.penyewa', 'U') IS NOT NULL
                     BEGIN
                         IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_penyewa_nama')
                             CREATE NONCLUSTERED INDEX idx_penyewa_nama ON dbo.penyewa(nama);
@@ -169,7 +173,7 @@ namespace SistemKos1
         }
         private void AnalyzeQuery(string sqlQuery)
         {
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(kn.connectionString()))
             {
                 conn.FireInfoMessageEventOnUserErrors = true;
 
@@ -215,7 +219,7 @@ namespace SistemKos1
                 MessageBox.Show(error);
                 return;
             }
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 SqlTransaction transaction = null;
 
@@ -244,10 +248,16 @@ namespace SistemKos1
                     LoadData();
                     ClearForm();
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     transaction?.Rollback();
-                    MessageBox.Show("Terjadi kesalahan:" + ex.Message);
+                    MessageBox.Show(
+                        "Terjadi duplikasi data saat menyimpan data. Silakan cek kembali input Anda atau hubungi admin jika masalah terus terjadi.",
+                        "Gagal Menyimpan Data",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+
                 }
             }
         }
@@ -266,7 +276,7 @@ namespace SistemKos1
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
@@ -322,7 +332,7 @@ namespace SistemKos1
                 DialogResult confirm = MessageBox.Show("Yakin ingin menghapus data ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (confirm == DialogResult.Yes)
                 {
-                    using (SqlConnection conn = new SqlConnection(connectionString))
+                    using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                     {
                         conn.Open();
                         SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi

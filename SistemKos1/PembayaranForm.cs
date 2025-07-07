@@ -7,12 +7,14 @@ namespace SistemKos1
 {
     public partial class PembayaranForm : Form
     {
-        private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA;Database=SistemManagementKost;Trusted_Connection=True;";
-
+        //private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA;Database=SistemManagementKost;Trusted_Connection=True;";
+        Koneksi kn = new Koneksi();
+        string strKonek = "";
 
         public PembayaranForm()
         {
             InitializeComponent();
+            strKonek = kn.connectionString();
         }
 
         private void PembayaranForm_Load(object sender, EventArgs e)
@@ -31,7 +33,7 @@ namespace SistemKos1
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.Open();
                     string query = "SELECT NIK FROM Penyewa";
@@ -51,7 +53,7 @@ namespace SistemKos1
 
         private void LoadData()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 string query = "SELECT * FROM pembayaran";
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
@@ -92,7 +94,7 @@ namespace SistemKos1
         END"
     };
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 foreach (string query in queries)
@@ -116,7 +118,7 @@ namespace SistemKos1
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction tran = conn.BeginTransaction();
@@ -158,7 +160,7 @@ namespace SistemKos1
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction tran = conn.BeginTransaction();
@@ -199,7 +201,7 @@ namespace SistemKos1
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction tran = conn.BeginTransaction();
@@ -259,7 +261,7 @@ namespace SistemKos1
 
         private void AnalyzeQuery(string sqlQuery)
         {
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(kn.connectionString()))
             {
                 conn.InfoMessage += (s, e) => MessageBox.Show(e.Message, "STATISTICS INFO");
                 conn.Open();

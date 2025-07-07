@@ -8,7 +8,11 @@ namespace SistemKos1
 {
     public partial class PemeliharaanForm : Form
     {
-        private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA; Database=SistemManagementKost;Trusted_Connection=True;";
+        Koneksi kn = new Koneksi();
+        string strKonek = "";
+
+        //private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA; Database=SistemManagementKost;Trusted_Connection=True;";
+        ObjectCache _cache = MemoryCache.Default;
         private MemoryCache cache = MemoryCache.Default;
         private string cacheKey = "PemeliharaanCache";
         private CacheItemPolicy cachePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) };
@@ -16,6 +20,8 @@ namespace SistemKos1
         public PemeliharaanForm()
         {
             InitializeComponent();
+            strKonek = kn.connectionString();
+            dgvPemeliharaan.CellClick += dgvPemeliharaan_CellClick;
         }
 
         private bool ValidasiInput()
@@ -53,7 +59,7 @@ namespace SistemKos1
                 }
                 else
                 {
-                    using (SqlConnection conn = new SqlConnection(connectionString))
+                    using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                     {
                         conn.Open();
                         string query = "SELECT TOP 100 id_pemeliharaan, id_kamar, deskripsi, tanggal, biaya FROM pemeliharaan ORDER BY tanggal DESC";
@@ -75,7 +81,7 @@ namespace SistemKos1
         {
             if (!ValidasiInput()) return;
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction trans = conn.BeginTransaction();
@@ -113,7 +119,7 @@ namespace SistemKos1
         {
             if (!ValidasiInput()) return;
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction trans = conn.BeginTransaction();
@@ -130,13 +136,23 @@ namespace SistemKos1
                         cmd.Parameters.AddWithValue("@biaya", numBiaya.Value);
 
                         cmd.ExecuteNonQuery();
-                    }
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
 
-                    trans.Commit();
-                    cache.Remove(cacheKey);
-                    MessageBox.Show("Data pemeliharaan berhasil diperbarui.");
-                    LoadData();
-                    ClearForm();
+                        {
+                            trans.Commit(); // Commit jika berhasil
+                            _cache.Remove(cacheKey);
+                            MessageBox.Show("Data berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadData();
+                            ClearForm();
+                        }
+                        else
+                        {
+                            trans.Rollback(); // Rollback jika tidak ada baris yang diperbarui
+                            MessageBox.Show("Data tidak ditemukan atau gagal diperbarui!", "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -159,7 +175,7 @@ namespace SistemKos1
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.Open();
                     using (SqlCommand cmd = new SqlCommand("DeletePemeliharaan", conn))
@@ -199,7 +215,7 @@ namespace SistemKos1
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.Open();
                     string query = "SELECT id_kamar FROM kamar";
@@ -228,7 +244,7 @@ namespace SistemKos1
 
         private void AnalyzeQuery(string sqlQuery)
         {
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(kn.connectionString()))
             {
                 conn.InfoMessage += (s, e) => MessageBox.Show(e.Message, "STATISTICS INFO");
                 conn.Open();
@@ -284,6 +300,20 @@ namespace SistemKos1
             numBiaya.Value = numBiaya.Minimum; // atau bisa juga di-set ke 0
         }
 
+        private void dgvPemeliharaan_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvPemeliharaan.Rows[e.RowIndex];
+
+                txtIdPemeliharaan.Text = row.Cells["id_pemeliharaan"].Value.ToString();
+                cmbIdKamar.SelectedValue = row.Cells["id_kamar"].Value.ToString(); // gunakan SelectedValue agar sinkron
+                txtDeskripsi.Text = row.Cells["deskripsi"].Value.ToString();
+                dtpTanggal.Value = Convert.ToDateTime(row.Cells["tanggal"].Value);
+                numBiaya.Value = Convert.ToDecimal(row.Cells["biaya"].Value);
+            }
+        }
+
+
     }
 }
-

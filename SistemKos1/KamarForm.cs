@@ -9,7 +9,9 @@ namespace SistemKos1
 {
     public partial class KamarForm : Form
     {
-        private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA;Database=SistemManagementKost;Trusted_Connection=True;";
+        Koneksi kn = new Koneksi();
+        string strKonek = "";
+        //private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA;Database=SistemManagementKost;Trusted_Connection=True;";
         MemoryCache cache = MemoryCache.Default;
         string cacheKey = "KamarData";
         CacheItemPolicy policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) };
@@ -17,6 +19,7 @@ namespace SistemKos1
         public KamarForm()
         {
             InitializeComponent();
+            strKonek = kn.connectionString();
         }
 
         private void KamarForm_Load(object sender, EventArgs e)
@@ -37,7 +40,7 @@ namespace SistemKos1
                 @"IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_Kamar_Harga' AND object_id = OBJECT_ID('dbo.kamar')) BEGIN CREATE NONCLUSTERED INDEX idx_Kamar_Harga ON dbo.kamar(harga); END"
             };
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 foreach (string query in queries)
@@ -51,7 +54,7 @@ namespace SistemKos1
 
         private void LoadPenyewaData()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 string query = "SELECT NIK, nama FROM penyewa";
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
@@ -71,7 +74,7 @@ namespace SistemKos1
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.InfoMessage += Conn_InfoMessage;
                 SqlCommand cmd = new SqlCommand("SET STATISTICS IO ON; SET STATISTICS TIME ON; SELECT * FROM kamar;", conn);
@@ -117,7 +120,7 @@ namespace SistemKos1
                 string nik = cmbPenyewa.SelectedValue?.ToString();
                 string status = string.IsNullOrWhiteSpace(nik) ? "tersedia" : "disewa";
 
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(strKonek))
                 {
                     conn.Open();
                     SqlTransaction transaction = conn.BeginTransaction();
@@ -174,7 +177,7 @@ namespace SistemKos1
                 string nik = cmbPenyewa.SelectedValue?.ToString();
                 string status = string.IsNullOrWhiteSpace(nik) ? "tersedia" : "disewa";
 
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.Open();
                     SqlTransaction transaction = conn.BeginTransaction();
@@ -220,7 +223,7 @@ namespace SistemKos1
                     return;
                 }
 
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.Open();
                     SqlTransaction transaction = conn.BeginTransaction();
@@ -311,7 +314,7 @@ namespace SistemKos1
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.FireInfoMessageEventOnUserErrors = true;
                     conn.InfoMessage += (s, e) =>
