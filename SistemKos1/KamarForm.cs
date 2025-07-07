@@ -142,10 +142,18 @@ namespace SistemKos1
                         ClearForm();
                         MessageBox.Show("Kamar berhasil ditambahkan.");
                     }
-                    catch (Exception ex)
+                    catch (SqlException sqlEx)
                     {
                         transaction.Rollback();
-                        MessageBox.Show("Transaksi gagal: " + ex.Message);
+
+                        if (sqlEx.Number == 2627 || sqlEx.Number == 2601) // Duplikat PK/UNIQUE
+                        {
+                            MessageBox.Show("ID Kamar sudah terdaftar. Silakan gunakan ID lain.", "Error Duplikat", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Transaksi gagal: " + sqlEx.Message);
+                        }
                     }
                 }
             }
@@ -154,6 +162,7 @@ namespace SistemKos1
                 MessageBox.Show("Kesalahan umum: " + ex.Message);
             }
         }
+
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {

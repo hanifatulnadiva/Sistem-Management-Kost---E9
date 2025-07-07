@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 
 namespace SistemKos1
@@ -433,6 +434,58 @@ namespace SistemKos1
                 MessageBoxIcon.Information
             );
 
+        }
+
+
+        private void PreviewData(string filePath)
+        {
+            try
+            {
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    IWorkbook workbook = new XSSFWorkbook(fs); //membuka workbook excel
+                    ISheet sheet = workbook.GetSheetAt(0); //mendapatkan worksheet pertama
+                    DataTable dt = new DataTable();
+
+                    //membaca header kolom
+                    IRow headerRow = sheet.GetRow(0);
+                    foreach (var cell in headerRow.Cells)
+                    {
+                        dt.Columns.Add(cell.ToString());
+                    }
+                    //membaca sisa data 
+                    for (int i = 1; i <= sheet.LastRowNum; i++) //lewati baris header
+                    {
+                        IRow dataRow = sheet.GetRow(i);
+                        DataRow newRow = dt.NewRow();
+                        int cellIndex = 0;
+                        foreach (var cell in dataRow.Cells)
+                        {
+                            newRow[cellIndex] = cell.ToString();
+                            cellIndex++;
+                        }
+                        dt.Rows.Add(newRow);
+                    }
+                    //membuka priviewdata  dan mengirimkan datatable ke form yang tersebut
+                    preview previewForm = new preview(dt);
+                    previewForm.ShowDialog(); //tampilkan preview data
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error reading the excel file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel files|*.xlsx; *.xlsm";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string filePath = openFileDialog.FileName;
+                PreviewData(filePath);//display privie before importing
+            }
         }
     }
 }

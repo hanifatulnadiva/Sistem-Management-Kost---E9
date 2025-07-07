@@ -10,8 +10,7 @@ namespace SistemKos1
     {
         Koneksi kn = new Koneksi();
         string strKonek = "";
-
-        //private string connectionString = "Server=HANIFATUL-NADIV\\HANIFA; Database=SistemManagementKost;Trusted_Connection=True;";
+        // private string connectionString = "Server=LAPTOP-FKV3IQ6M\\IRSYADBOY; Database=SistemManagementKost;Trusted_Connection=True;";
         ObjectCache _cache = MemoryCache.Default;
         private MemoryCache cache = MemoryCache.Default;
         private string cacheKey = "PemeliharaanCache";
@@ -106,11 +105,24 @@ namespace SistemKos1
                     LoadData();
                     ClearForm();
                 }
+                catch (SqlException ex)
+                {
+                    trans.Rollback();
+                    if (ex.Number == 2627)
+                    {
+                        MessageBox.Show("ID Pemeliharaan tersebut sudah digunakan, gunakan ID Pemeliharaan yang lain!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Terjadi kesalahan database: " + ex.Message);
+                    }
+                }
                 catch (Exception ex)
                 {
                     trans.Rollback();
                     MessageBox.Show("Terjadi kesalahan: " + ex.Message);
                 }
+
             }
         }
 
@@ -235,6 +247,7 @@ namespace SistemKos1
 
         private void PemeliharaanForm_Load(object sender, EventArgs e)
         {
+            EnsureIndexes();
             ClearForm();
             LoadComboBoxKamar();
             LoadData();
@@ -274,6 +287,55 @@ namespace SistemKos1
                 }
             }
         }
+
+        private void EnsureIndexes()
+        {
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
+            {
+                conn.InfoMessage += (sender, e) =>
+                {
+                    MessageBox.Show(e.Message, "INFO INDEX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                };
+
+                conn.Open();
+
+                string createIndexesScript = @"
+        -- 1. Index untuk mempercepat join atau filter berdasarkan id_kamar
+        IF NOT EXISTS (
+            SELECT 1 FROM sys.indexes 
+            WHERE name = 'idx_Pemeliharaan_IdKamar'
+            AND object_id = OBJECT_ID('dbo.pemeliharaan')
+        )
+        BEGIN
+            CREATE NONCLUSTERED INDEX idx_Pemeliharaan_IdKamar
+            ON dbo.pemeliharaan(id_kamar);
+            PRINT 'Created idx_Pemeliharaan_IdKamar';
+        END
+        ELSE
+            PRINT 'idx_Pemeliharaan_IdKamar sudah ada.';
+
+        -- 2. Index untuk mempercepat pencarian berdasarkan tanggal
+        IF NOT EXISTS (
+            SELECT 1 FROM sys.indexes 
+            WHERE name = 'idx_Pemeliharaan_Tanggal'
+            AND object_id = OBJECT_ID('dbo.pemeliharaan')
+        )
+        BEGIN
+            CREATE NONCLUSTERED INDEX idx_Pemeliharaan_Tanggal
+            ON dbo.pemeliharaan(tanggal);
+            PRINT 'Created idx_Pemeliharaan_Tanggal';
+        END
+        ELSE
+            PRINT 'idx_Pemeliharaan_Tanggal sudah ada.';
+        ";
+
+                using (SqlCommand cmd = new SqlCommand(createIndexesScript, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         private void BtnAnalyze_Click(object sender, EventArgs e)
         {
 

@@ -142,11 +142,20 @@ namespace SistemKos1
                     LoadData();
                     ClearForm();
                 }
-                catch (Exception ex)
+                catch (SqlException ex)
                 {
                     tran.Rollback();
-                    MessageBox.Show("Gagal menyimpan data pembayaran: " + ex.Message);
+
+                    if (ex.Number == 2627) // PRIMARY KEY violation
+                    {
+                        MessageBox.Show("ID Pembayaran sudah digunakan. Silakan gunakan ID yang lain.", "Duplikasi ID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Gagal menyimpan data pembayaran: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
+
             }
         }
 
