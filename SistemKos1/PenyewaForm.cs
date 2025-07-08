@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Text;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
@@ -22,6 +23,8 @@ namespace SistemKos1
         ObjectCache _cache = MemoryCache.Default;
         string CacheKey = "PenyewaData";
         CacheItemPolicy _policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) };
+
+        private StringBuilder analysisLog = new StringBuilder();
 
         public PenyewaForm()
         {
@@ -140,7 +143,7 @@ namespace SistemKos1
                 int sisaHari = 30 - ((int)totalHari % 30);
                 DateTime tanggalBenar = tanggalMasuk.AddDays(((int)(totalHari / 30) + 1) * 30);
 
-                error = $"Durasi sewa harus kelipatan 30 hari (1 bulan).\n" +
+                error = $"Tanggal keluar harus kelipatan 30 hari (1 bulan) setelah tanggal masuk.\n" +
                         $"seharusnya tanggal keluar pada: {tanggalBenar:dd MMMM yyyy}";
                 return false;
             }
@@ -172,44 +175,62 @@ namespace SistemKos1
                 }
             }
         }
-        private void AnalyzeQuery(string sqlQuery)
-        {
-            using (var conn = new SqlConnection(kn.connectionString()))
-            {
-                conn.FireInfoMessageEventOnUserErrors = true;
-
-                conn.InfoMessage += Conn_InfoMessage;
-
-                conn.Open();
-
-                var wrapped = $@"
-                    SET STATISTICS IO ON;
-                    SET STATISTICS TIME ON;
-                    {sqlQuery};
-                    SET STATISTICS IO OFF;
-                    SET STATISTICS TIME OFF;
-                ";
-
-                using (var cmd = new SqlCommand(wrapped, conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    {
-                        while (reader.Read())
-                        {
-                            // Bisa proses data jika ingin
-                        }
-                    } while (reader.NextResult()) ;
-                }
-            }
-        }
-
         private void Conn_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
             foreach (SqlError info in e.Errors)
             {
-                MessageBox.Show(info.Message, "STATISTICS INFO");
+                analysisLog.AppendLine(info.Message);
             }
         }
+
+        private void AnalyzeQuery(string sqlQuery)
+        {
+            analysisLog.Clear(); 
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
+            try
+            {
+                using (var conn = new SqlConnection(kn.connectionString()))
+                {
+                    conn.FireInfoMessageEventOnUserErrors = true;
+                    conn.InfoMessage += Conn_InfoMessage;
+                    conn.Open();
+
+                    string wrappedQuery = $@"
+                SET STATISTICS IO ON;
+                SET STATISTICS TIME ON;
+                {sqlQuery};
+                SET STATISTICS IO OFF;
+                SET STATISTICS TIME OFF;
+            ";
+
+                    using (var cmd = new SqlCommand(wrappedQuery, conn))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read()) { }
+                        while (reader.NextResult()) { }
+                    }
+                }
+
+                stopwatch.Stop();
+                double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+
+                analysisLog.AppendLine($"\nTotal waktu aplikasi: {elapsedMs:0.00} ms");
+
+                if (elapsedMs > 3000)
+                    analysisLog.AppendLine("⚠️ Waktu eksekusi melebihi batas ideal (3 detik)");
+                else
+                    analysisLog.AppendLine("✅ Waktu eksekusi dalam batas ideal");
+
+                MessageBox.Show(analysisLog.ToString(), "Hasil Analisis Query", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menganalisis query: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
 
 
@@ -280,7 +301,7 @@ namespace SistemKos1
             using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
-                SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+                SqlTransaction transaction = conn.BeginTransaction(); 
 
                 try
                 {
@@ -296,7 +317,7 @@ namespace SistemKos1
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
                         {
-                            transaction.Commit(); // Commit jika berhasil
+                            transaction.Commit(); 
                             _cache.Remove(CacheKey);
                             MessageBox.Show("Data berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             LoadData();
@@ -304,7 +325,7 @@ namespace SistemKos1
                         }
                         else
                         {
-                            transaction.Rollback(); // Rollback jika tidak ada baris yang diperbarui
+                            transaction.Rollback();
                             MessageBox.Show("Data tidak ditemukan atau gagal diperbarui!", "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -313,7 +334,7 @@ namespace SistemKos1
                 {
                     try
                     {
-                        transaction.Rollback(); // Rollback saat exception
+                        transaction.Rollback(); 
                     }
                     catch (Exception rollbackEx)
                     {
@@ -336,7 +357,7 @@ namespace SistemKos1
                     using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                     {
                         conn.Open();
-                        SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+                        SqlTransaction transaction = conn.BeginTransaction(); 
 
                         try
                         {
@@ -350,7 +371,7 @@ namespace SistemKos1
                                 int rowsAffected = cmd.ExecuteNonQuery();
                                 if (rowsAffected > 0)
                                 {
-                                    transaction.Commit(); // Commit jika berhasil
+                                    transaction.Commit(); 
                                     _cache.Remove(CacheKey);
                                     MessageBox.Show("Data berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                     LoadData();
@@ -358,7 +379,7 @@ namespace SistemKos1
                                 }
                                 else
                                 {
-                                    transaction.Rollback(); // Rollback jika tidak ada yang dihapus
+                                    transaction.Rollback(); 
                                     MessageBox.Show("Data tidak ditemukan atau gagal dihapus!", "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
                             }
@@ -367,7 +388,7 @@ namespace SistemKos1
                         {
                             try
                             {
-                                transaction.Rollback(); // Rollback jika terjadi error
+                                transaction.Rollback(); 
                             }
                             catch (Exception rollbackEx)
                             {
@@ -403,7 +424,7 @@ namespace SistemKos1
 
         private void lblKontak_Click(object sender, EventArgs e)
         {
-            // Kosong, jika tidak digunakan
+            
         }
 
         private void ClearForm()
@@ -421,20 +442,21 @@ namespace SistemKos1
             AnalyzeQuery(sqlQuery);
         }
 
+
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-
+            _cache.Remove(CacheKey);
             LoadData();
 
-            // Debugging: Cek jumlah kolom dan baris
-            MessageBox.Show(
+    
+                MessageBox.Show(
                 $"Jumlah Kolom: {dataGridViewPenyewa.ColumnCount}\nJumlah Baris: {dataGridViewPenyewa.RowCount}",
                 "Debugging DataGridView",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
             );
-
         }
+
 
 
         private void PreviewData(string filePath)
@@ -443,18 +465,18 @@ namespace SistemKos1
             {
                 using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    IWorkbook workbook = new XSSFWorkbook(fs); //membuka workbook excel
-                    ISheet sheet = workbook.GetSheetAt(0); //mendapatkan worksheet pertama
+                    IWorkbook workbook = new XSSFWorkbook(fs); 
+                    ISheet sheet = workbook.GetSheetAt(0); 
                     DataTable dt = new DataTable();
 
-                    //membaca header kolom
+                    
                     IRow headerRow = sheet.GetRow(0);
                     foreach (var cell in headerRow.Cells)
                     {
                         dt.Columns.Add(cell.ToString());
                     }
-                    //membaca sisa data 
-                    for (int i = 1; i <= sheet.LastRowNum; i++) //lewati baris header
+                 
+                    for (int i = 1; i <= sheet.LastRowNum; i++) 
                     {
                         IRow dataRow = sheet.GetRow(i);
                         DataRow newRow = dt.NewRow();
@@ -466,9 +488,9 @@ namespace SistemKos1
                         }
                         dt.Rows.Add(newRow);
                     }
-                    //membuka priviewdata  dan mengirimkan datatable ke form yang tersebut
+                    
                     preview previewForm = new preview(dt);
-                    previewForm.ShowDialog(); //tampilkan preview data
+                    previewForm.ShowDialog(); 
                 }
             }
             catch (Exception ex)
@@ -484,7 +506,7 @@ namespace SistemKos1
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string filePath = openFileDialog.FileName;
-                PreviewData(filePath);//display privie before importing
+                PreviewData(filePath);
             }
         }
     }

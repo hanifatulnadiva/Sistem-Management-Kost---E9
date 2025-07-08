@@ -108,13 +108,96 @@ namespace SistemKos1
             }
         }
 
+        // Fungsi pembantu untuk mendapatkan harga kamar berdasarkan NIK
+        private decimal GetHargaKamarByNIK(string nik)
+        {
+            decimal hargaKamar = 0;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
+                {
+                    conn.Open();
+                    // Query untuk mendapatkan harga kamar dari tabel 'kamar' berdasarkan NIK penyewa
+                    // Asumsi: Setiap NIK penyewa hanya menempati satu kamar pada satu waktu
+                    // dan kolom NIK di tabel kamar terisi untuk kamar yang disewa.
+                    string queryHargaKamar = "SELECT harga FROM kamar WHERE NIK = @NIK";
+                    using (SqlCommand cmdHarga = new SqlCommand(queryHargaKamar, conn))
+                    {
+                        cmdHarga.Parameters.AddWithValue("@NIK", nik);
+                        object result = cmdHarga.ExecuteScalar();
+                        if (result != null && decimal.TryParse(result.ToString(), out hargaKamar))
+                        {
+                            return hargaKamar;
+                        }
+                        else
+                        {
+                            // NIK tidak ditemukan di tabel kamar, atau harga tidak valid
+                            return -1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan saat memeriksa harga kamar: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return -1; // Mengembalikan -1 sebagai indikator error
+            }
+        }
 
+
+        private void cmbNIK_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Pastikan ada item yang terpilih dan itu bukan item placeholder (jika ada)
+            if (cmbNIK.SelectedValue != null && cmbNIK.SelectedIndex != -1)
+            {
+                string selectedNIK = cmbNIK.SelectedValue.ToString();
+                decimal hargaKamar = GetHargaKamarByNIK(selectedNIK);
+
+                if (hargaKamar != -1) // Jika harga kamar berhasil didapatkan
+                {
+                    numJumlah.Value = hargaKamar;
+                }
+                else
+                {
+
+                    MessageBox.Show("Harga kamar tidak dapat ditemukan untuk NIK ini. Silakan periksa data kamar.");
+                    numJumlah.Value = numJumlah.Minimum;
+                }
+            }
+            else
+            {
+                numJumlah.Value = numJumlah.Minimum; // Reset jika tidak ada NIK yang terpilih
+            }
+        }
+        // --- Akhir Event Handler Baru ---
 
         private void btnSimpan_Click(object sender, EventArgs e)
         {
             if (txtIdPembayaran.Text.Length != 5)
             {
                 MessageBox.Show("ID Pembayaran harus terdiri dari 5 karakter.");
+                return;
+            }
+
+            string selectedNIK = cmbNIK.SelectedValue?.ToString();
+
+            if (string.IsNullOrEmpty(selectedNIK))
+            {
+                MessageBox.Show("NIK penyewa belum dipilih.");
+                return;
+            }
+
+
+            decimal hargaKamar = GetHargaKamarByNIK(selectedNIK);
+
+            if (hargaKamar == -1)
+            {
+                return;
+            }
+
+            if (numJumlah.Value != hargaKamar)
+            {
+                MessageBox.Show($"Jumlah pembayaran seharusnya ({hargaKamar:C}). Data tidak dapat disimpan.", "Validasi Pembayaran", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -166,6 +249,29 @@ namespace SistemKos1
             if (txtIdPembayaran.Text.Length != 5)
             {
                 MessageBox.Show("ID Pembayaran harus terdiri dari 5 karakter.");
+                return;
+            }
+
+            string selectedNIK = cmbNIK.SelectedValue?.ToString();
+
+            if (string.IsNullOrEmpty(selectedNIK))
+            {
+                MessageBox.Show("NIK penyewa belum dipilih.");
+                return;
+            }
+
+
+            decimal hargaKamar = GetHargaKamarByNIK(selectedNIK);
+
+            if (hargaKamar == -1)
+            {
+                return;
+            }
+
+
+            if (numJumlah.Value != hargaKamar)
+            {
+                MessageBox.Show($"Jumlah pembayaran seharusnya ({hargaKamar:C}). Data tidak dapat diperbarui.", "Validasi Pembayaran", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 

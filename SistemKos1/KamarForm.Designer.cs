@@ -48,35 +48,37 @@
             // 
             this.txtIdKamar.Location = new System.Drawing.Point(121, 20);
             this.txtIdKamar.Name = "txtIdKamar";
-            this.txtIdKamar.Size = new System.Drawing.Size(100, 20);
+            this.txtIdKamar.Size = new System.Drawing.Size(351, 26);
             this.txtIdKamar.TabIndex = 1;
             // 
             // txtHarga
             // 
             this.txtHarga.Location = new System.Drawing.Point(121, 60);
             this.txtHarga.Name = "txtHarga";
-            this.txtHarga.Size = new System.Drawing.Size(100, 20);
+            this.txtHarga.Size = new System.Drawing.Size(351, 26);
             this.txtHarga.TabIndex = 3;
             // 
             // cmbStatus
             // 
             this.cmbStatus.Location = new System.Drawing.Point(121, 100);
             this.cmbStatus.Name = "cmbStatus";
-            this.cmbStatus.Size = new System.Drawing.Size(121, 21);
+            this.cmbStatus.Size = new System.Drawing.Size(351, 28);
             this.cmbStatus.TabIndex = 5;
             // 
             // cmbPenyewa
             // 
             this.cmbPenyewa.Location = new System.Drawing.Point(126, 140);
             this.cmbPenyewa.Name = "cmbPenyewa";
-            this.cmbPenyewa.Size = new System.Drawing.Size(121, 21);
+            this.cmbPenyewa.Size = new System.Drawing.Size(346, 28);
             this.cmbPenyewa.TabIndex = 7;
             this.cmbPenyewa.SelectedIndexChanged += new System.EventHandler(this.cmbPenyewa_SelectedIndexChanged);
             // 
             // dataGridViewKamar
             // 
+            this.dataGridViewKamar.ColumnHeadersHeight = 34;
             this.dataGridViewKamar.Location = new System.Drawing.Point(20, 220);
             this.dataGridViewKamar.Name = "dataGridViewKamar";
+            this.dataGridViewKamar.RowHeadersWidth = 62;
             this.dataGridViewKamar.Size = new System.Drawing.Size(540, 200);
             this.dataGridViewKamar.TabIndex = 12;
             this.dataGridViewKamar.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewKamar_CellClick);
@@ -183,6 +185,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewKamar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
     }
 }

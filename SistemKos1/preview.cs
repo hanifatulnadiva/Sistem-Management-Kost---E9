@@ -33,9 +33,9 @@ namespace SistemKos1
         {
             string NIM = row["NIK"].ToString();
             //validasi Nim (misalnya harus berjumlah 11 karakter
-            if (NIM.Length != 11)
+            if (NIM.Length != 16)
             {
-                MessageBox.Show("nim harus terdiri dari 16 karakter.", "kesalahan validasi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("nik harus terdiri dari 16 karakter.", "kesalahan validasi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
 
             }
@@ -60,7 +60,7 @@ namespace SistemKos1
 
                     }
 
-                    string query = "insert into Mahasiswa (NIK, nama, kontak, tanggal_masuk, tanggal_keluar) values (@NIK, @nama, @kontak, @tanggal_masuk, @tanggal_keluar)";
+                    string query = "insert into penyewa (NIK, nama, kontak, tanggal_masuk, tanggal_keluar) values (@NIK, @nama, @kontak, @tanggal_masuk, @tanggal_keluar)";
 
                     using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                     {
@@ -70,9 +70,9 @@ namespace SistemKos1
                         {
                             cmd.CommandText = query;
 
-                            cmd.Parameters.AddWithValue("@NIK", row["NIM"]);
-                            cmd.Parameters.AddWithValue("@nama", row["Nama"]);
-                            cmd.Parameters.AddWithValue("@kontak", row["Email"]);
+                            cmd.Parameters.AddWithValue("@NIK", row["NIK"]);
+                            cmd.Parameters.AddWithValue("@nama", row["nama"]);
+                            cmd.Parameters.AddWithValue("@kontak", row["kontak"]);
                             cmd.Parameters.AddWithValue("@tanggal_masuk", row["tanggal_masuk"]);
                             cmd.Parameters.AddWithValue("@tanggal_keluar", row["tanggal_keluar"]);
 
@@ -90,12 +90,12 @@ namespace SistemKos1
             }
         }
 
-        private void DgvPreviewPenyewa(object sender, DataGridViewCellEventArgs e)
+        private void preview_Load(object sender, EventArgs e)
         {
-
+            dgvPreviewPenyewa.AutoResizeColumns();
         }
 
-        private void btnOK_Click_1(object sender, EventArgs e)
+        private void btnOK_Click(object sender, EventArgs e)
         {
             //menanyakan kepada pengguna jika mereka ingin mengimpord data 
             DialogResult result = MessageBox.Show("Apakah anda ingin mengimport data ini ke database?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -105,16 +105,6 @@ namespace SistemKos1
                 //mengimport data dari datagrideview ke database
                 ImportDataToDatabase();
             }
-        }
-
-        private void preview_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
