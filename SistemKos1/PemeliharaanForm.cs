@@ -25,6 +25,13 @@ namespace SistemKos1
 
         private bool ValidasiInput()
         {
+            
+
+            if (string.IsNullOrWhiteSpace(txtIdPemeliharaan.Text) || string.IsNullOrWhiteSpace(txtDeskripsi.Text) )
+            {
+                MessageBox.Show( "Semua field harus diisi.");
+                return false;
+            }
             if (string.IsNullOrWhiteSpace(txtIdPemeliharaan.Text) || txtIdPemeliharaan.Text.Length != 5)
             {
                 MessageBox.Show("ID Pemeliharaan harus terdiri dari 5 karakter.");
@@ -290,46 +297,18 @@ namespace SistemKos1
 
         private void EnsureIndexes()
         {
-            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
+            using (var conn = new SqlConnection(kn.connectionString()))
             {
-                conn.InfoMessage += (sender, e) =>
-                {
-                    MessageBox.Show(e.Message, "INFO INDEX", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                };
-
                 conn.Open();
-
-                string createIndexesScript = @"
-        -- 1. Index untuk mempercepat join atau filter berdasarkan id_kamar
-        IF NOT EXISTS (
-            SELECT 1 FROM sys.indexes 
-            WHERE name = 'idx_Pemeliharaan_IdKamar'
-            AND object_id = OBJECT_ID('dbo.pemeliharaan')
-        )
-        BEGIN
-            CREATE NONCLUSTERED INDEX idx_Pemeliharaan_IdKamar
-            ON dbo.pemeliharaan(id_kamar);
-            PRINT 'Created idx_Pemeliharaan_IdKamar';
-        END
-        ELSE
-            PRINT 'idx_Pemeliharaan_IdKamar sudah ada.';
-
-        -- 2. Index untuk mempercepat pencarian berdasarkan tanggal
-        IF NOT EXISTS (
-            SELECT 1 FROM sys.indexes 
-            WHERE name = 'idx_Pemeliharaan_Tanggal'
-            AND object_id = OBJECT_ID('dbo.pemeliharaan')
-        )
-        BEGIN
-            CREATE NONCLUSTERED INDEX idx_Pemeliharaan_Tanggal
-            ON dbo.pemeliharaan(tanggal);
-            PRINT 'Created idx_Pemeliharaan_Tanggal';
-        END
-        ELSE
-            PRINT 'idx_Pemeliharaan_Tanggal sudah ada.';
-        ";
-
-                using (SqlCommand cmd = new SqlCommand(createIndexesScript, conn))
+                var indexScript = @"
+            IF OBJECT_ID('dbo.pemeliharaan', 'U') IS NOT NULL
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_pemeliharaan_id_kamar')
+                    CREATE NONCLUSTERED INDEX idx_pemeliharaan_id_kamar ON dbo.pemeliharaan(id_kamar);
+                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_pemeliharaan_tanggal')
+                    CREATE NONCLUSTERED INDEX idx_pemeliharaan_tanggal ON dbo.pemeliharaan(tanggal);
+            END";
+                using (var cmd = new SqlCommand(indexScript, conn))
                 {
                     cmd.ExecuteNonQuery();
                 }

@@ -36,7 +36,12 @@ namespace SistemKos1
                 using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     conn.Open();
-                    string query = "SELECT NIK FROM Penyewa";
+                    string query = @"
+                        SELECT DISTINCT p.NIK 
+                        FROM Penyewa p
+                        JOIN kamar k ON p.NIK = k.NIK
+                        WHERE k.NIK IS NOT NULL";
+
                     SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
